@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-center">Payment for {{ course_type|title }} Course</h3>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+
+                <div class="alert alert-info">
+                    <h5>Course Fee: KSh 500</h5>
+                    <p>You will receive an M-Pesa STK push prompt on your phone to complete the payment.</p>
+                </div>
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Safaricom Phone Number</label>
+                        <input type="tel" class="form-control" id="phone" name="phone"
+                            value="{{ session.get('user_phone', '') }}" placeholder="2547XXXXXXXX" pattern="2547\d{8}"
+                            required>
+                        <div class="form-text">Ensure this is the number registered with M-Pesa</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100">Pay KSh 500 via M-Pesa</button>
+                </form>
+
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('courses') }}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

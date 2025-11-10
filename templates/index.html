@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="text-center mb-5">
+            <h1 class="display-4">Learn Web Development & Graphic Design</h1>
+            <p class="lead">Professional courses to boost your career</p>
+        </div>
+
+        <div class="row">
+            <!-- Web Development Card -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 course-card">
+                    <div class="card-body">
+                        <h3 class="card-title">Web Development</h3>
+                        <p class="card-text">
+                            Learn HTML, CSS, JavaScript, and Python to build modern, responsive websites and web
+                            applications.
+                            This comprehensive course covers front-end and back-end development.
+                        </p>
+                        <ul>
+                            <li>HTML5 & CSS3 Fundamentals</li>
+                            <li>Responsive Web Design</li>
+                            <li>JavaScript Programming</li>
+                            <li>Python Backend Development</li>
+                            <li>Database Integration</li>
+                        </ul>
+                        <div class="access-note alert alert-warning">
+                            <strong>Access Required:</strong> You need to pay KSh 500 to access this course content.
+                        </div>
+                        <a href="{{ url_for('payment', course_type='webdev') if session.user_id else url_for('login') }}"
+                            class="btn btn-primary btn-lg">Get Started</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphic Design Card -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 course-card">
+                    <div class="card-body">
+                        <h3 class="card-title">Graphic Design</h3>
+                        <p class="card-text">
+                            Master the principles of graphic design, learn to use industry-standard tools,
+                            and create stunning visual content for digital and print media.
+                        </p>
+                        <ul>
+                            <li>Design Principles & Theory</li>
+                            <li>Adobe Creative Suite</li>
+                            <li>Logo & Brand Identity Design</li>
+                            <li>Typography & Layout</li>
+                            <li>Digital Illustration</li>
+                        </ul>
+                        <div class="access-note alert alert-warning">
+                            <strong>Access Required:</strong> You need to pay KSh 500 to access this course content.
+                        </div>
+                        <a href="{{ url_for('payment', course_type='graphic') if session.user_id else url_for('login') }}"
+                            class="btn btn-primary btn-lg">Get Started</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

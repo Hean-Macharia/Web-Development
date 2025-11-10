@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Available Courses</h1>
+
+        {% if user.paid_courses %}
+        <div class="alert alert-success">
+            You have access to: {{ user.paid_courses|join(', ')|title }} courses
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            You haven't purchased any courses yet. <a href="{{ url_for('index') }}">Browse courses</a>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <!-- Web Development Course -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title">Web Development</h3>
+                        <p class="card-text">
+                            Access our comprehensive web development curriculum through W3Schools.
+                        </p>
+
+                        {% if 'webdev' in user.paid_courses %}
+                        <a href="{{ course_links.webdev.html }}" target="_blank" class="btn btn-success">
+                            Start HTML Course
+                        </a>
+                        <a href="{{ course_links.webdev.css }}" target="_blank" class="btn btn-success mt-2">
+                            Start CSS Course
+                        </a>
+                        <a href="{{ course_links.webdev.python }}" target="_blank" class="btn btn-success mt-2">
+                            Start Python Course
+                        </a>
+                        {% else %}
+                        <div class="alert alert-info">
+                            Purchase this course to access the learning materials.
+                        </div>
+                        <a href="{{ url_for('payment', course_type='webdev') }}" class="btn btn-primary">
+                            Purchase Course (KSh {{ PAYMENT_AMOUNT }})
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphic Design Course -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title">Graphic Design</h3>
+                        <p class="card-text">
+                            Access our graphic design curriculum through Alison.
+                        </p>
+
+                        {% if 'graphic' in user.paid_courses %}
+                        <a href="{{ course_links.graphic.main }}" target="_blank" class="btn btn-success">
+                            Start Graphic Design Course
+                        </a>
+                        {% else %}
+                        <div class="alert alert-info">
+                            Purchase this course to access the learning materials.
+                        </div>
+                        <a href="{{ url_for('payment', course_type='graphic') }}" class="btn btn-primary">
+                            Purchase Course (KSh {{ PAYMENT_AMOUNT }})
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5>Session Information</h5>
+                <p>Your session will automatically expire after 1 hour of inactivity for security purposes.</p>
+                <p id="session-timer" class="text-muted"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let sessionStartTime = new Date();
+
+        function updateSessionTimer() {
+            const now = new Date();
+            const elapsed = Math.floor((now - sessionStartTime) / 1000);
+            const remaining = 3600 - elapsed;
+
+            if (remaining <= 0) {
+                document.getElementById('session-timer').innerHTML =
+                    '<strong class="text-danger">Session expired. Please login again.</strong>';
+                setTimeout(() => {
+                    window.location.href = '/login?timeout=true';
+                }, 2000);
+            } else {
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
+                document.getElementById('session-timer').innerHTML =
+                    `Session expires in: ${minutes}m ${seconds}s`;
+            }
+        }
+
+        setInterval(updateSessionTimer, 1000);
+        updateSessionTimer();
+
+        setInterval(() => {
+            fetch('/check_session')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.valid) {
+                        window.location.href = '/login?timeout=true';
+                    }
+                });
+        }, 30000);
+    });
+</script>
+{% endblock %}
