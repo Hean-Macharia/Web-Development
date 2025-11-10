@@ -46,7 +46,7 @@ MPESA_CONSUMER_KEY = 'xueqgztGna3VENZaV7c6pXC34uk7LsDxA4dnIjG2n3OV167d'
 MPESA_CONSUMER_SECRET = 'XpbH6z5QRz4unhk6XDg83G2n1p796Fd9EUvqs0tEDE3TsZZeYauJ2AApBb0SoMiL'
 MPESA_PASSKEY = 'a3d842c161dc6617ac99f9e6d250fc1583584e29c1cae2123d3d9f4db94790dc'
 MPESA_SHORTCODE = '4185095'
-MPESA_CALLBACK_URL = 'https://kuccps-courses-px6s.onrender.com/callback'
+MPESA_CALLBACK_URL = 'https://web-development-6fdl.onrender.com/callback'
 
 # Payment settings - REAL MPESA
 PAYMENT_AMOUNT = 1  # 1 KSH for testing, change to 500 for production
@@ -633,7 +633,7 @@ def debug_payments():
         'total_successful_payments': len([v for v in payment_status.values() if v == 'success']),
         'total_failed_payments': len([v for v in payment_status.values() if v == 'failed']),
         'callback_url': MPESA_CALLBACK_URL,
-        'callback_url_accessible': 'Check if URL is publicly accessible'
+        'app_url': 'https://web-development-6fdl.onrender.com'
     })
 
 @app.route('/test-callback', methods=['GET', 'POST'])
@@ -643,14 +643,38 @@ def test_callback():
         'message': 'Callback URL is accessible',
         'timestamp': datetime.now().isoformat(),
         'method': request.method,
-        'data_received': request.get_json() if request.method == 'POST' else None
+        'data_received': request.get_json() if request.method == 'POST' else None,
+        'app_url': 'https://web-development-6fdl.onrender.com',
+        'callback_url': MPESA_CALLBACK_URL
+    })
+
+@app.route('/health')
+def health_check():
+    """Health check endpoint for monitoring"""
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': datetime.now().isoformat(),
+        'database': 'connected' if mongo.db else 'disconnected',
+        'mpesa_token': 'available' if get_mpesa_access_token() else 'unavailable'
     })
 
 if __name__ == '__main__':
     print("🚀 Starting application with REAL MPesa integration...")
     print(f"💰 Payment amount: KSh {PAYMENT_AMOUNT}")
     print(f"📞 Callback URL: {MPESA_CALLBACK_URL}")
+    print(f"🌐 App URL: https://web-development-6fdl.onrender.com")
     print(f"🏢 Business Shortcode: {MPESA_SHORTCODE}")
     print("⚡ REAL MPesa CALLBACK PROCESSING ONLY - No simulation fallback")
     print("⏳ Payments will only complete when MPesa sends callback with receipt")
+    
+    # Test callback URL accessibility
+    try:
+        test_response = requests.get('https://web-development-6fdl.onrender.com/test-callback', timeout=10)
+        if test_response.status_code == 200:
+            print("✅ Callback URL is publicly accessible")
+        else:
+            print(f"⚠️ Callback URL check returned status: {test_response.status_code}")
+    except Exception as e:
+        print(f"❌ Callback URL accessibility check failed: {e}")
+    
     app.run(debug=True, port=5000, host='0.0.0.0')
