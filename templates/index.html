@@ -1,65 +1,388 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="text-center mb-5">
-            <h1 class="display-4">Learn Web Development & Graphic Design</h1>
-            <p class="lead">Professional courses to boost your career</p>
+<div class="container-fluid py-5">
+    <!-- Hero Section -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8 text-center">
+            <h1 class="display-4 fw-bold text-dark mb-4">
+                Master <span class="text-primary">In-Demand</span> Tech Skills
+            </h1>
+            <p class="lead text-muted fs-5 mb-4">
+                Professional courses designed to launch your career in web development, graphic design, and
+                cybersecurity
+            </p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <span class="badge bg-primary fs-6 p-3">
+                    <i class="fas fa-laptop-code me-2"></i>Hands-on Projects
+                </span>
+                <span class="badge bg-success fs-6 p-3">
+                    <i class="fas fa-certificate me-2"></i>Industry Relevant
+                </span>
+                <span class="badge bg-info fs-6 p-3">
+                    <i class="fas fa-clock me-2"></i>Self-Paced Learning
+                </span>
+            </div>
         </div>
+    </div>
 
-        <div class="row">
-            <!-- Web Development Card -->
-            <div class="col-md-6 mb-4">
-                <div class="card h-100 course-card">
-                    <div class="card-body">
-                        <h3 class="card-title">Web Development</h3>
-                        <p class="card-text">
-                            Learn HTML, CSS, JavaScript, and Python to build modern, responsive websites and web
-                            applications.
-                            This comprehensive course covers front-end and back-end development.
-                        </p>
-                        <ul>
-                            <li>HTML5 & CSS3 Fundamentals</li>
-                            <li>Responsive Web Design</li>
-                            <li>JavaScript Programming</li>
-                            <li>Python Backend Development</li>
-                            <li>Database Integration</li>
-                        </ul>
-                        <div class="access-note alert alert-warning">
-                            <strong>Access Required:</strong> You need to pay KSh 500 to access this course content.
+    <!-- Courses Section -->
+    <div class="row justify-content-center">
+        <div class="col-xxl-10">
+            <div class="row g-4">
+                <!-- Web Development Card -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card course-card h-100 border-0 shadow-lg hover-shadow">
+                        <div class="card-header bg-primary text-white py-4">
+                            <div class="d-flex align-items-center">
+                                <div class="course-icon bg-white bg-opacity-20 p-3 rounded-circle me-3">
+                                    <i class="fas fa-code fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h3 class="h4 mb-1">{{ course_descriptions.webdev.title }}</h3>
+                                    <span class="badge bg-light text-primary fs-6">KSh {{ course_prices.webdev }}</span>
+                                </div>
+                            </div>
                         </div>
-                        <a href="{{ url_for('payment', course_type='webdev') if session.user_id else url_for('login') }}"
-                            class="btn btn-primary btn-lg">Get Started</a>
+                        <div class="card-body p-4">
+                            <p class="card-text text-muted mb-4">
+                                {{ course_descriptions.webdev.description }}
+                            </p>
+
+                            <h6 class="fw-bold text-dark mb-3">
+                                <i class="fas fa-star text-warning me-2"></i>What You'll Learn:
+                            </h6>
+                            <ul class="list-unstyled mb-4">
+                                {% for feature in course_descriptions.webdev.features %}
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    {{ feature }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+
+                            <div class="access-section mt-auto">
+                                <div class="alert alert-warning border-warning bg-light-warning mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-lock text-warning me-2 fs-5"></i>
+                                        <div>
+                                            <strong class="d-block">Access Required</strong>
+                                            <small>Pay KSh {{ course_prices.webdev }} to unlock full course
+                                                content</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <a href="{{ url_for('payment', course_type='webdev') if session.user_id else url_for('login') }}"
+                                    class="btn btn-primary btn-lg w-100 py-3 fw-semibold">
+                                    <i class="fas fa-rocket me-2"></i>
+                                    Enroll Now - KSh {{ course_prices.webdev }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphic Design Card -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card course-card h-100 border-0 shadow-lg hover-shadow">
+                        <div class="card-header bg-success text-white py-4">
+                            <div class="d-flex align-items-center">
+                                <div class="course-icon bg-white bg-opacity-20 p-3 rounded-circle me-3">
+                                    <i class="fas fa-palette fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h3 class="h4 mb-1">{{ course_descriptions.graphic.title }}</h3>
+                                    <span class="badge bg-light text-success fs-6">KSh {{ course_prices.graphic
+                                        }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <p class="card-text text-muted mb-4">
+                                {{ course_descriptions.graphic.description }}
+                            </p>
+
+                            <h6 class="fw-bold text-dark mb-3">
+                                <i class="fas fa-star text-warning me-2"></i>What You'll Learn:
+                            </h6>
+                            <ul class="list-unstyled mb-4">
+                                {% for feature in course_descriptions.graphic.features %}
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    {{ feature }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+
+                            <div class="access-section mt-auto">
+                                <div class="alert alert-warning border-warning bg-light-warning mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-lock text-warning me-2 fs-5"></i>
+                                        <div>
+                                            <strong class="d-block">Access Required</strong>
+                                            <small>Pay KSh {{ course_prices.graphic }} to unlock full course
+                                                content</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <a href="{{ url_for('payment', course_type='graphic') if session.user_id else url_for('login') }}"
+                                    class="btn btn-success btn-lg w-100 py-3 fw-semibold">
+                                    <i class="fas fa-magic me-2"></i>
+                                    Enroll Now - KSh {{ course_prices.graphic }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cyber Security Card -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card course-card h-100 border-0 shadow-lg hover-shadow">
+                        <div class="card-header bg-danger text-white py-4">
+                            <div class="d-flex align-items-center">
+                                <div class="course-icon bg-white bg-opacity-20 p-3 rounded-circle me-3">
+                                    <i class="fas fa-shield-alt fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h3 class="h4 mb-1">{{ course_descriptions.cybersecurity.title }}</h3>
+                                    <span class="badge bg-light text-danger fs-6">KSh {{ course_prices.cybersecurity
+                                        }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <p class="card-text text-muted mb-4">
+                                {{ course_descriptions.cybersecurity.description }}
+                            </p>
+
+                            <h6 class="fw-bold text-dark mb-3">
+                                <i class="fas fa-star text-warning me-2"></i>What You'll Learn:
+                            </h6>
+                            <ul class="list-unstyled mb-4">
+                                {% for feature in course_descriptions.cybersecurity.features %}
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    {{ feature }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+
+                            <div class="access-section mt-auto">
+                                <div class="alert alert-warning border-warning bg-light-warning mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-lock text-warning me-2 fs-5"></i>
+                                        <div>
+                                            <strong class="d-block">Access Required</strong>
+                                            <small>Pay KSh {{ course_prices.cybersecurity }} to unlock full course
+                                                content</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <a href="{{ url_for('payment', course_type='cybersecurity') if session.user_id else url_for('login') }}"
+                                    class="btn btn-danger btn-lg w-100 py-3 fw-semibold">
+                                    <i class="fas fa-user-shield me-2"></i>
+                                    Enroll Now - KSh {{ course_prices.cybersecurity }}
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Graphic Design Card -->
-            <div class="col-md-6 mb-4">
-                <div class="card h-100 course-card">
-                    <div class="card-body">
-                        <h3 class="card-title">Graphic Design</h3>
-                        <p class="card-text">
-                            Master the principles of graphic design, learn to use industry-standard tools,
-                            and create stunning visual content for digital and print media.
-                        </p>
-                        <ul>
-                            <li>Design Principles & Theory</li>
-                            <li>Adobe Creative Suite</li>
-                            <li>Logo & Brand Identity Design</li>
-                            <li>Typography & Layout</li>
-                            <li>Digital Illustration</li>
-                        </ul>
-                        <div class="access-note alert alert-warning">
-                            <strong>Access Required:</strong> You need to pay KSh 500 to access this course content.
+    <!-- Features Section -->
+    <div class="row justify-content-center mt-5 pt-5">
+        <div class="col-lg-8 text-center">
+            <h2 class="h1 fw-bold mb-5">Why Choose LearnTech Academy?</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card p-4">
+                        <div class="feature-icon bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3 mx-auto"
+                            style="width: 80px; height: 80px;">
+                            <i class="fas fa-graduation-cap fa-2x"></i>
                         </div>
-                        <a href="{{ url_for('payment', course_type='graphic') if session.user_id else url_for('login') }}"
-                            class="btn btn-primary btn-lg">Get Started</a>
+                        <h5>Expert Instructors</h5>
+                        <p class="text-muted">Learn from industry professionals with years of experience</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card p-4">
+                        <div class="feature-icon bg-success bg-opacity-10 text-success rounded-circle p-3 mb-3 mx-auto"
+                            style="width: 80px; height: 80px;">
+                            <i class="fas fa-briefcase fa-2x"></i>
+                        </div>
+                        <h5>Career Focused</h5>
+                        <p class="text-muted">Skills that employers are looking for in today's market</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card p-4">
+                        <div class="feature-icon bg-info bg-opacity-10 text-info rounded-circle p-3 mb-3 mx-auto"
+                            style="width: 80px; height: 80px;">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                        <h5>Flexible Learning</h5>
+                        <p class="text-muted">Study at your own pace with lifetime access to materials</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .course-card {
+        transition: all 0.3s ease;
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .course-card:hover {
+        transform: translateY(-10px);
+    }
+
+    .hover-shadow:hover {
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .course-card .card-header {
+        border-radius: 1rem 1rem 0 0 !important;
+        border: none;
+    }
+
+    .course-icon {
+        backdrop-filter: blur(10px);
+    }
+
+    .access-section {
+        border-top: 1px solid #e9ecef;
+        padding-top: 1.5rem;
+    }
+
+    .bg-light-warning {
+        background-color: rgba(255, 193, 7, 0.1) !important;
+    }
+
+    .feature-card {
+        transition: transform 0.3s ease;
+        border-radius: 1rem;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+        transform: scale(1.1);
+    }
+
+    .btn {
+        border-radius: 0.75rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .badge {
+        border-radius: 0.5rem;
+        font-weight: 600;
+    }
+
+    .alert {
+        border-radius: 0.75rem;
+        border: none;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .display-4 {
+            font-size: 2rem;
+        }
+
+        .course-card {
+            margin-bottom: 2rem;
+        }
+
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+    }
+
+    /* Animation for page load */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .course-card {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .course-card:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .course-card:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+</style>
+
+<script>
+    // Add intersection observer for scroll animations
+    document.addEventListener('DOMContentLoaded', function () {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function (entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe feature cards
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'all 0.6s ease-out';
+            observer.observe(card);
+        });
+    });
+
+    // Add smooth hover effects
+    document.querySelectorAll('.course-card').forEach(card => {
+        card.addEventListener('mouseenter', function () {
+            this.style.transform = 'translateY(-10px)';
+        });
+
+        card.addEventListener('mouseleave', function () {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+</script>
 {% endblock %}

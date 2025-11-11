@@ -13,8 +13,11 @@
                 </div>
                 <h5>Waiting for payment confirmation...</h5>
                 <p>Please complete the payment on your phone. You will be redirected automatically once confirmed.</p>
-                <p class="text-muted">Transaction Reference: {{ transaction_ref }}</p>
-                
+
+                <div class="alert alert-info">
+                    <i class="fas fa-mobile-alt"></i> Check your phone for MPesa prompt
+                </div>
+
                 <div id="payment-status" class="mt-3"></div>
             </div>
         </div>
@@ -22,28 +25,67 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const transactionRef = "{{ transaction_ref }}";
         const statusElement = document.getElementById('payment-status');
         let checkCount = 0;
-        const maxChecks = 60; // 5 minutes maximum (5 seconds * 60 = 300 seconds)
-        
+        const maxChecks = 120; // 10 minutes maximum (5 seconds * 120 = 600 seconds)
+
         function checkPaymentStatus() {
             fetch(`/payment/status/${transactionRef}`)
                 .then(response => response.json())
                 .then(data => {
                     checkCount++;
-                    
+
                     if (data.status === 'success') {
-                        statusElement.innerHTML = '<div class="alert alert-success">Payment confirmed! Redirecting to courses...</div>';
+                        statusElement.innerHTML = `
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i>
+                                <strong>Payment Confirmed!</strong> Redirecting to courses...
+                            </div>
+                        `;
                         setTimeout(() => {
                             window.location.href = '/courses';
                         }, 2000);
                     } else if (data.status === 'failed') {
-                        statusElement.innerHTML = '<div class="alert alert-danger">Payment failed. Please try again.</div>';
+                        statusElement.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-times-circle"></i>
+                                <strong>Payment Failed</strong>
+                                <p class="mb-0 mt-2">Please try again or contact support if the issue persists.</p>
+                                <a href="/payment/{{ course_type }}" class="btn btn-warning mt-2">Try Again</a>
+                            </div>
+                        `;
+                    } else if (data.status === 'timeout') {
+                        statusElement.innerHTML = `
+                            <div class="alert alert-warning">
+                                <i class="fas fa-clock"></i>
+                                <strong>Payment Timeout</strong>
+                                <p class="mb-0 mt-2">The payment process took too long. Please check your phone and try again.</p>
+                                <a href="/payment/{{ course_type }}" class="btn btn-primary mt-2">Retry Payment</a>
+                            </div>
+                        `;
                     } else if (checkCount >= maxChecks) {
-                        statusElement.innerHTML = '<div class="alert alert-warning">Payment timeout. Please check your phone or try again.</div>';
+                        statusElement.innerHTML = `
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Taking Longer Than Expected</strong>
+                                <p class="mb-0 mt-2">The payment is still processing. Please check your phone or try again.</p>
+                                <a href="/payment/{{ course_type }}" class="btn btn-primary mt-2">Retry Payment</a>
+                            </div>
+                        `;
                     } else {
+                        // Show progress for longer waits
+                        if (checkCount > 12) { // After 1 minute
+                            const minutesWaiting = Math.floor(checkCount / 12);
+                            statusElement.innerHTML = `
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    Still processing... (${minutesWaiting} minute${minutesWaiting > 1 ? 's' : ''})
+                                </div>
+                            `;
+                        }
+
                         // Check again after 5 seconds
                         setTimeout(checkPaymentStatus, 5000);
                     }
@@ -51,13 +93,40 @@
                 .catch(error => {
                     console.error('Error checking payment status:', error);
                     if (checkCount < maxChecks) {
+                        // Show network error but keep trying
+                        statusElement.innerHTML = `
+                            <div class="alert alert-secondary">
+                                <i class="fas fa-wifi"></i>
+                                Connection issue - still checking...
+                            </div>
+                        `;
                         setTimeout(checkPaymentStatus, 5000);
+                    } else {
+                        statusElement.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Connection Error</strong>
+                                <p class="mb-0 mt-2">Unable to verify payment status. Please check your internet connection.</p>
+                                <a href="/courses" class="btn btn-primary mt-2">Go to Courses</a>
+                            </div>
+                        `;
                     }
                 });
         }
-        
+
         // Start checking payment status
         checkPaymentStatus();
     });
 </script>
+
+<style>
+    .alert i {
+        margin-right: 10px;
+    }
+
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+</style>
 {% endblock %}

@@ -1,46 +1,335 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="text-center">Login to Your Account</h3>
-            </div>
-            <div class="card-body">
-                {% if error %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endif %}
-
-                {% if request.args.get('timeout') %}
-                <div class="alert alert-warning">Your session has expired. Please login again.</div>
-                {% endif %}
-
-                <form method="POST">
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email Address</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
+<div class="container-fluid min-vh-100 py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="row justify-content-center">
+        <div class="col-xl-4 col-lg-5 col-md-6 col-sm-8">
+            <div class="card shadow-2xl border-0">
+                <!-- Header -->
+                <div class="card-header bg-primary text-white text-center py-4 position-relative overflow-hidden">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-white bg-opacity-10"></div>
+                    <div class="position-relative z-1">
+                        <div class="avatar-circle bg-white bg-opacity-20 p-3 rounded-circle d-inline-flex mb-3">
+                            <i class="fas fa-sign-in-alt fa-2x text-white"></i>
+                        </div>
+                        <h2 class="fw-bold mb-2">Welcome Back</h2>
+                        <p class="mb-0 opacity-90">Sign in to continue learning</p>
                     </div>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="index_number" class="form-label">Index Number</label>
-                        <input type="text" class="form-control" id="index_number" name="index_number"
-                            placeholder="12345678901/2020" pattern="\d{11}/\d{4}" required>
+                <div class="card-body p-4 p-md-5">
+                    {% if error %}
+                    <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                        <i class="fas fa-exclamation-triangle me-3 fs-5"></i>
+                        <div class="flex-grow-1">
+                            <strong class="d-block">Login Error</strong>
+                            <span class="small">{{ error }}</span>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
+                    {% endif %}
 
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                    {% if request.args.get('timeout') %}
+                    <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+                        <i class="fas fa-clock me-3 fs-5"></i>
+                        <div class="flex-grow-1">
+                            <strong class="d-block">Session Expired</strong>
+                            <span class="small">Your session has expired. Please login again.</span>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
+                    {% endif %}
 
-                    <button type="submit" class="btn btn-primary w-100">Login</button>
-                </form>
+                    {% if request.args.get('reset_success') %}
+                    <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
+                        <i class="fas fa-check-circle me-3 fs-5"></i>
+                        <div class="flex-grow-1">
+                            <strong class="d-block">Password Reset Successful</strong>
+                            <span class="small">Your password has been reset successfully. Please login with your new
+                                password.</span>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
 
-                <div class="text-center mt-3">
-                    <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+                    {% if request.args.get('email_sent') %}
+                    <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+                        <i class="fas fa-envelope me-3 fs-5"></i>
+                        <div class="flex-grow-1">
+                            <strong class="d-block">Check Your Email</strong>
+                            <span class="small">Password reset instructions have been sent to your email address.</span>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" id="loginForm">
+                        <!-- Email -->
+                        <div class="mb-4">
+                            <label for="email" class="form-label fw-semibold text-dark">
+                                <i class="fas fa-envelope me-2 text-primary"></i>Email Address
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-at text-muted"></i>
+                                </span>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    placeholder="Enter your email address" required
+                                    value="{{ request.form.email if request.form.email }}">
+                            </div>
+                        </div>
+
+                        <!-- Index Number -->
+                        <div class="mb-4">
+                            <label for="index_number" class="form-label fw-semibold text-dark">
+                                <i class="fas fa-id-card me-2 text-primary"></i>Index Number
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-user-graduate text-muted"></i>
+                                </span>
+                                <input type="text" class="form-control" id="index_number" name="index_number"
+                                    placeholder="12345678901/2020" pattern="\d{11}/\d{4}" required
+                                    value="{{ request.form.index_number if request.form.index_number }}">
+                            </div>
+                            <div class="form-text text-muted">
+                                <i class="fas fa-info-circle me-1"></i>Format: 12345678901/2020
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label for="password" class="form-label fw-semibold text-dark mb-0">
+                                    <i class="fas fa-lock me-2 text-primary"></i>Password
+                                </label>
+                                <a href="{{ url_for('forgot_password') }}"
+                                    class="text-primary text-decoration-none small fw-semibold">
+                                    <i class="fas fa-key me-1"></i>Forgot Password?
+                                </a>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-lock text-muted"></i>
+                                </span>
+                                <input type="password" class="form-control" id="password" name="password"
+                                    placeholder="Enter your password" required>
+                                <button type="button" class="btn btn-outline-secondary"
+                                    onclick="togglePassword('password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold" id="loginBtn">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Register Link -->
+                    <div class="text-center mt-4 pt-3 border-top">
+                        <p class="text-muted mb-2">Don't have an account?</p>
+                        <a href="{{ url_for('register') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const icon = field.parentElement.querySelector('button i');
+
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            field.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    }
+
+    // Handle login form submission
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+        const submitBtn = document.getElementById('loginBtn');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing In...';
+        submitBtn.disabled = true;
+    });
+
+    // Form validation
+    document.addEventListener('DOMContentLoaded', function () {
+        // Email validation
+        const emailInput = document.getElementById('email');
+        emailInput.addEventListener('blur', function () {
+            if (this.value && !this.validity.valid) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        // Index number validation
+        const indexInput = document.getElementById('index_number');
+        indexInput.addEventListener('blur', function () {
+            const pattern = /^\d{11}\/\d{4}$/;
+            if (this.value && !pattern.test(this.value)) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+</script>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+    }
+
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        border: none;
+    }
+
+    .avatar-circle {
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        transition: transform 0.3s ease;
+    }
+
+    .avatar-circle:hover {
+        transform: scale(1.05);
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        transform: translateY(-1px);
+    }
+
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+    .btn {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        border: none;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(78, 115, 223, 0.4);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .btn-outline-primary {
+        border: 2px solid #4e73df;
+        color: #4e73df;
+        font-weight: 600;
+    }
+
+    .btn-outline-primary:hover {
+        background: #4e73df;
+        border-color: #4e73df;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .shadow-2xl {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-right: none;
+        transition: all 0.3s ease;
+    }
+
+    .input-group .form-control {
+        border-left: none;
+    }
+
+    .input-group .btn-outline-secondary {
+        border-left: none;
+        border-color: #dee2e6;
+    }
+
+    .input-group .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+
+    .alert {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Loading animation */
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .btn-primary:disabled {
+        animation: pulse 2s infinite;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 2rem !important;
+        }
+
+        .btn-lg {
+            padding: 0.875rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .avatar-circle {
+            width: 60px;
+            height: 60px;
+            padding: 1rem !important;
+        }
+
+        .avatar-circle i {
+            font-size: 1.5rem !important;
+        }
+    }
+</style>
 {% endblock %}

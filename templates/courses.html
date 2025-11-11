@@ -7,7 +7,11 @@
 
         {% if user.paid_courses %}
         <div class="alert alert-success">
-            You have access to: {{ user.paid_courses|join(', ')|title }} courses
+            You have access to:
+            {% for course in user.paid_courses %}
+            <span class="badge bg-success">{{ course|title }}</span>
+            {% endfor %}
+            courses
         </div>
         {% else %}
         <div class="alert alert-warning">
@@ -17,7 +21,7 @@
 
         <div class="row">
             <!-- Web Development Course -->
-            <div class="col-md-6 mb-4">
+            <div class="col-md-4 mb-4">
                 <div class="card h-100">
                     <div class="card-body">
                         <h3 class="card-title">Web Development</h3>
@@ -40,7 +44,7 @@
                             Purchase this course to access the learning materials.
                         </div>
                         <a href="{{ url_for('payment', course_type='webdev') }}" class="btn btn-primary">
-                            Purchase Course (KSh {{ PAYMENT_AMOUNT }})
+                            Purchase Course (KSh {{ course_prices.webdev }})
                         </a>
                         {% endif %}
                     </div>
@@ -48,7 +52,7 @@
             </div>
 
             <!-- Graphic Design Course -->
-            <div class="col-md-6 mb-4">
+            <div class="col-md-4 mb-4">
                 <div class="card h-100">
                     <div class="card-body">
                         <h3 class="card-title">Graphic Design</h3>
@@ -65,7 +69,32 @@
                             Purchase this course to access the learning materials.
                         </div>
                         <a href="{{ url_for('payment', course_type='graphic') }}" class="btn btn-primary">
-                            Purchase Course (KSh {{ PAYMENT_AMOUNT }})
+                            Purchase Course (KSh {{ course_prices.graphic }})
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cyber Security Course -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title">Cyber Security</h3>
+                        <p class="card-text">
+                            Access our cybersecurity curriculum through W3Schools.
+                        </p>
+
+                        {% if 'cybersecurity' in user.paid_courses %}
+                        <a href="{{ course_links.cybersecurity.main }}" target="_blank" class="btn btn-success">
+                            Start Cyber Security Course
+                        </a>
+                        {% else %}
+                        <div class="alert alert-info">
+                            Purchase this course to access the learning materials.
+                        </div>
+                        <a href="{{ url_for('payment', course_type='cybersecurity') }}" class="btn btn-primary">
+                            Purchase Course (KSh {{ course_prices.cybersecurity }})
                         </a>
                         {% endif %}
                     </div>

@@ -1,55 +1,405 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="text-center">Create Account</h3>
-            </div>
-            <div class="card-body">
-                {% if error %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endif %}
-
-                <form method="POST">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Full Name</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
+<div class="container-fluid min-vh-100 py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="row justify-content-center">
+        <div class="col-xl-5 col-lg-6 col-md-8 col-sm-10">
+            <div class="card shadow-2xl border-0">
+                <!-- Header -->
+                <div class="card-header bg-primary text-white text-center py-4 position-relative overflow-hidden">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-white bg-opacity-10"></div>
+                    <div class="position-relative z-1">
+                        <div class="avatar-circle bg-white bg-opacity-20 p-3 rounded-circle d-inline-flex mb-3">
+                            <i class="fas fa-user-plus fa-2x text-white"></i>
+                        </div>
+                        <h2 class="fw-bold mb-2">Join Our Academy</h2>
+                        <p class="mb-0 opacity-90">Start your learning journey today</p>
                     </div>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email Address</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
+                <div class="card-body p-4 p-md-5">
+                    {% if error %}
+                    <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                        <i class="fas fa-exclamation-triangle me-3 fs-5"></i>
+                        <div class="flex-grow-1">
+                            <strong class="d-block">Registration Error</strong>
+                            <span class="small">{{ error }}</span>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
+                    {% endif %}
 
-                    <div class="mb-3">
-                        <label for="index_number" class="form-label">Index Number</label>
-                        <input type="text" class="form-control" id="index_number" name="index_number"
-                            placeholder="12345678901/2020" pattern="\d{11}/\d{4}" required>
-                        <div class="form-text">Format: 12345678901/2020</div>
+                    <form method="POST" id="registerForm" class="needs-validation" novalidate>
+                        <!-- Name Fields -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label fw-semibold text-dark">
+                                    <i class="fas fa-user me-2 text-primary"></i>First Name
+                                </label>
+                                <input type="text" class="form-control form-control-lg" id="first_name"
+                                    name="first_name" placeholder="Enter your first name" required>
+                                <div class="invalid-feedback">
+                                    Please provide your first name.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label fw-semibold text-dark">
+                                    <i class="fas fa-user me-2 text-primary"></i>Last Name
+                                </label>
+                                <input type="text" class="form-control form-control-lg" id="last_name" name="last_name"
+                                    placeholder="Enter your last name" required>
+                                <div class="invalid-feedback">
+                                    Please provide your last name.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-semibold text-dark">
+                                <i class="fas fa-envelope me-2 text-primary"></i>Email Address
+                            </label>
+                            <input type="email" class="form-control form-control-lg" id="email" name="email"
+                                placeholder="Enter your email address" required>
+                            <div class="invalid-feedback">
+                                Please provide a valid email address.
+                            </div>
+                        </div>
+
+                        <!-- Index Number -->
+                        <div class="mb-3">
+                            <label for="index_number" class="form-label fw-semibold text-dark">
+                                <i class="fas fa-id-card me-2 text-primary"></i>Index Number
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="index_number"
+                                name="index_number" placeholder="12345678901/2020" pattern="\d{11}/\d{4}" required>
+                            <div class="form-text text-muted">
+                                <i class="fas fa-info-circle me-1"></i>Format: 12345678901/2020
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid index number in the format: 12345678901/2020
+                            </div>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="mb-3">
+                            <label for="phone" class="form-label fw-semibold text-dark">
+                                <i class="fas fa-phone me-2 text-primary"></i>Phone Number
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-mobile-alt text-muted"></i>
+                                </span>
+                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="0712345678"
+                                    pattern="(07\d{8}|01\d{8})" title="10-digit phone number starting with 07 or 01"
+                                    maxlength="10" required>
+                            </div>
+                            <div class="form-text text-muted">
+                                <i class="fas fa-info-circle me-1"></i>10-digit number starting with 07 or 01 (e.g.,
+                                0712345678)
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid 10-digit phone number starting with 07 or 01.
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label fw-semibold text-dark">
+                                <i class="fas fa-lock me-2 text-primary"></i>Password
+                            </label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password"
+                                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+                                    oninput="validatePassword()" placeholder="Create a strong password" required>
+                                <button type="button" class="btn btn-outline-secondary"
+                                    onclick="togglePassword('password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+
+                            <!-- Password Requirements -->
+                            <div class="password-requirements mt-3 p-3 bg-light rounded">
+                                <h6 class="text-dark fw-semibold mb-2">
+                                    <i class="fas fa-shield-alt me-2 text-primary"></i>Password Requirements
+                                </h6>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="d-flex align-items-center mb-2 requirement-item"
+                                            data-requirement="length">
+                                            <div class="requirement-icon me-2">
+                                                <i class="fas fa-times text-danger"></i>
+                                            </div>
+                                            <small class="text-muted">At least 8 characters</small>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-2 requirement-item"
+                                            data-requirement="lowercase">
+                                            <div class="requirement-icon me-2">
+                                                <i class="fas fa-times text-danger"></i>
+                                            </div>
+                                            <small class="text-muted">One lowercase letter</small>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-2 requirement-item"
+                                            data-requirement="uppercase">
+                                            <div class="requirement-icon me-2">
+                                                <i class="fas fa-times text-danger"></i>
+                                            </div>
+                                            <small class="text-muted">One uppercase letter</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="d-flex align-items-center mb-2 requirement-item"
+                                            data-requirement="number">
+                                            <div class="requirement-icon me-2">
+                                                <i class="fas fa-times text-danger"></i>
+                                            </div>
+                                            <small class="text-muted">One number</small>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-2 requirement-item"
+                                            data-requirement="special">
+                                            <div class="requirement-icon me-2">
+                                                <i class="fas fa-times text-danger"></i>
+                                            </div>
+                                            <small class="text-muted">One special character</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="mb-4">
+                            <label for="confirm_password" class="form-label fw-semibold text-dark">
+                                <i class="fas fa-lock me-2 text-primary"></i>Confirm Password
+                            </label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="confirm_password"
+                                    name="confirm_password" oninput="validatePassword()"
+                                    placeholder="Confirm your password" required>
+                                <button type="button" class="btn btn-outline-secondary"
+                                    onclick="togglePassword('confirm_password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="mt-2" id="passwordMatch">
+                                <!-- Password match status will appear here -->
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold" id="submitBtn">
+                                <i class="fas fa-user-plus me-2"></i>Create Account
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Login Link -->
+                    <div class="text-center mt-4 pt-3 border-top">
+                        <p class="text-muted mb-2">Already have an account?</p>
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In Here
+                        </a>
                     </div>
-
-                    <div class="mb-3">
-                        <label for="phone" class="form-label">Phone Number</label>
-                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="2547XXXXXXXX"
-                            pattern="2547\d{8}" required>
-                        <div class="form-text">Format: 2547XXXXXXXX (Safaricom number)</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100">Register</button>
-                </form>
-
-                <div class="text-center mt-3">
-                    <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function validatePassword() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        const submitBtn = document.getElementById('submitBtn');
+        const passwordMatch = document.getElementById('passwordMatch');
+
+        // Password requirements validation
+        const requirements = {
+            length: password.length >= 8,
+            lowercase: /[a-z]/.test(password),
+            uppercase: /[A-Z]/.test(password),
+            number: /\d/.test(password),
+            special: /[@$!%*?&]/.test(password)
+        };
+
+        // Update requirement indicators
+        Object.keys(requirements).forEach(req => {
+            const item = document.querySelector(`[data-requirement="${req}"]`);
+            const icon = item.querySelector('.requirement-icon i');
+            const text = item.querySelector('small');
+
+            if (requirements[req]) {
+                icon.className = 'fas fa-check text-success';
+                text.classList.remove('text-muted');
+                text.classList.add('text-success');
+                text.style.fontWeight = '600';
+            } else {
+                icon.className = 'fas fa-times text-danger';
+                text.classList.remove('text-success');
+                text.classList.add('text-muted');
+                text.style.fontWeight = '400';
+            }
+        });
+
+        // Check if passwords match
+        let passwordsMatch = false;
+        if (password && confirmPassword) {
+            passwordsMatch = password === confirmPassword;
+            if (passwordsMatch) {
+                passwordMatch.innerHTML = '<div class="alert alert-success py-2 mb-0 small"><i class="fas fa-check-circle me-2"></i>Passwords match</div>';
+            } else {
+                passwordMatch.innerHTML = '<div class="alert alert-danger py-2 mb-0 small"><i class="fas fa-times-circle me-2"></i>Passwords do not match</div>';
+            }
+        } else {
+            passwordMatch.innerHTML = '';
+        }
+
+        // Enable/disable submit button based on validation
+        const isValid = Object.values(requirements).every(req => req) && passwordsMatch;
+        submitBtn.disabled = !isValid;
+
+        // Update button styling
+        if (isValid) {
+            submitBtn.classList.remove('btn-secondary');
+            submitBtn.classList.add('btn-primary');
+        } else {
+            submitBtn.classList.remove('btn-primary');
+            submitBtn.classList.add('btn-secondary');
+        }
+    }
+
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const icon = field.parentElement.querySelector('button i');
+
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            field.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    }
+
+    // Real-time validation
+    document.getElementById('password').addEventListener('input', validatePassword);
+    document.getElementById('confirm_password').addEventListener('input', validatePassword);
+
+    // Phone number formatting
+    document.getElementById('phone').addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 10) {
+            value = value.slice(0, 10);
+        }
+        e.target.value = value;
+    });
+
+    // Bootstrap validation
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+    }
+
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        border: none;
+    }
+
+    .avatar-circle {
+        border: 3px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+
+    .form-control-lg {
+        padding: 0.75rem 1rem;
+    }
+
+    .btn {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        border: none;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(78, 115, 223, 0.4);
+    }
+
+    .btn-outline-primary {
+        border: 2px solid #4e73df;
+        color: #4e73df;
+        font-weight: 600;
+    }
+
+    .btn-outline-primary:hover {
+        background: #4e73df;
+        border-color: #4e73df;
+    }
+
+    .password-requirements {
+        border: 1px solid #e9ecef;
+    }
+
+    .requirement-icon {
+        width: 16px;
+        text-align: center;
+    }
+
+    .shadow-2xl {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 2rem !important;
+        }
+
+        .password-requirements .row {
+            flex-direction: column;
+        }
+
+        .password-requirements .col-sm-6 {
+            width: 100%;
+        }
+    }
+</style>
 {% endblock %}

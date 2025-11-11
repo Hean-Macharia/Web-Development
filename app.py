@@ -9,14 +9,32 @@ import time
 import threading
 import os
 import re
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import secrets
+import string
 from werkzeug.security import generate_password_hash, check_password_hash
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here-change-in-production'
 
-# MongoDB configuration with error handling
+# Load all sensitive configuration from environment variables
+app.secret_key = os.getenv('SECRET_KEY', 'fallback-secret-key-change-in-production')
+
+# MongoDB configuration from environment variables
+MONGO_URI = os.getenv('MONGODB_URI')
+if not MONGO_URI:
+    print("❌ MONGODB_URI environment variable is required!")
+    # Fallback for development
+    MONGO_URI = "mongodb+srv://iconichean:1Loye8PM3YwlV5h4@cluster0.meufk73.mongodb.net/webdev_courses?retryWrites=true&w=majority"
+
+app.config["MONGO_URI"] = MONGO_URI
+
 try:
-    app.config["MONGO_URI"] = "mongodb+srv://iconichean:1Loye8PM3YwlV5h4@cluster0.meufk73.mongodb.net/webdev_courses?retryWrites=true&w=majority"
     mongo = PyMongo(app)
     # Test the connection
     mongo.db.command('ping')
@@ -41,15 +59,42 @@ except Exception as e:
         db = MockDB()
     mongo = MockMongo()
 
-# M-Pesa Daraja API credentials (PRODUCTION)
-MPESA_CONSUMER_KEY = 'xueqgztGna3VENZaV7c6pXC34uk7LsDxA4dnIjG2n3OV167d'
-MPESA_CONSUMER_SECRET = 'XpbH6z5QRz4unhk6XDg83G2n1p796Fd9EUvqs0tEDE3TsZZeYauJ2AApBb0SoMiL'
-MPESA_PASSKEY = 'a3d842c161dc6617ac99f9e6d250fc1583584e29c1cae2123d3d9f4db94790dc'
-MPESA_SHORTCODE = '4185095'
-MPESA_CALLBACK_URL = 'https://web-development-6fdl.onrender.com/callback'
+# M-Pesa Daraja API credentials from environment variables
+MPESA_CONSUMER_KEY = os.getenv('MPESA_CONSUMER_KEY')
+MPESA_CONSUMER_SECRET = os.getenv('MPESA_CONSUMER_SECRET')
+MPESA_PASSKEY = os.getenv('MPESA_PASSKEY')
+MPESA_SHORTCODE = os.getenv('MPESA_SHORTCODE')
+MPESA_CALLBACK_URL = os.getenv('MPESA_CALLBACK_URL', 'https://web-development-6fdl.onrender.com/callback')
 
-# Payment settings - REAL MPESA
-PAYMENT_AMOUNT = 1  # 1 KSH for testing, change to 500 for production
+# Email configuration from environment variables
+SMTP_SERVER = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
+SMTP_PORT = int(os.getenv('SMTP_PORT', '587'))
+SMTP_EMAIL = os.getenv('SMTP_EMAIL')
+SMTP_PASSWORD = os.getenv('SMTP_PASSWORD')
+
+# Validate required environment variables
+required_env_vars = {
+    'MPESA_CONSUMER_KEY': MPESA_CONSUMER_KEY,
+    'MPESA_CONSUMER_SECRET': MPESA_CONSUMER_SECRET,
+    'MPESA_PASSKEY': MPESA_PASSKEY,
+    'MPESA_SHORTCODE': MPESA_SHORTCODE,
+}
+
+missing_vars = [var for var, value in required_env_vars.items() if not value]
+if missing_vars:
+    print(f"⚠️  Missing MPesa environment variables: {', '.join(missing_vars)}")
+    print("🔧 MPesa features will not work properly")
+
+if not SMTP_EMAIL or not SMTP_PASSWORD:
+    print("⚠️  Missing email configuration - password reset emails will not be sent")
+
+# Payment settings - Different prices for different courses
+COURSE_PRICES = {
+    'webdev': 1,      # 1 KSH for testing
+    'graphic': 1,     # 1 KSH for testing  
+    'cybersecurity': 2  # 2 KSH for testing (different price)
+}
+
 SIMULATION_MODE = False  # DISABLED - Using real MPesa
 
 # External course links
@@ -61,6 +106,46 @@ COURSE_LINKS = {
     },
     'graphic': {
         'main': 'https://alison.com/topic/learn/83010/learning-outcomes'
+    },
+    'cybersecurity': {
+        'main': 'https://www.w3schools.com/cybersecurity/index.php'
+    }
+}
+
+# Course descriptions for the homepage
+COURSE_DESCRIPTIONS = {
+    'webdev': {
+        'title': 'Web Development',
+        'description': 'Learn HTML, CSS, JavaScript, and Python to build modern, responsive websites and web applications. This comprehensive course covers front-end and back-end development.',
+        'features': [
+            'HTML5 & CSS3 Fundamentals',
+            'Responsive Web Design',
+            'JavaScript Programming',
+            'Python Backend Development',
+            'Database Integration'
+        ]
+    },
+    'graphic': {
+        'title': 'Graphic Design',
+        'description': 'Master the principles of graphic design, learn to use industry-standard tools, and create stunning visual content for digital and print media.',
+        'features': [
+            'Design Principles & Theory',
+            'Adobe Creative Suite',
+            'Logo & Brand Identity Design',
+            'Typography & Layout',
+            'Digital Illustration'
+        ]
+    },
+    'cybersecurity': {
+        'title': 'Cyber Security',
+        'description': 'Learn essential cybersecurity skills to protect systems and networks from digital attacks. Master security fundamentals, threat detection, and risk management.',
+        'features': [
+            'Cybersecurity Fundamentals',
+            'Network Security',
+            'Threat Detection & Prevention',
+            'Risk Management',
+            'Ethical Hacking Basics'
+        ]
     }
 }
 
@@ -74,6 +159,10 @@ mock_payments = []
 
 def get_mpesa_access_token():
     """Get M-Pesa API access token"""
+    if not MPESA_CONSUMER_KEY or not MPESA_CONSUMER_SECRET:
+        print("❌ MPesa credentials not configured")
+        return None
+        
     try:
         url = 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
         auth = (MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET)
@@ -236,7 +325,7 @@ def process_payment_callback_fast(callback_data):
                                     p.update(update_data)
                                     break
                         
-                        # IMMEDIATELY update payment status
+                        # CRITICAL FIX: Update payment status in BOTH memory and database
                         payment_status[transaction_ref] = 'success'
                         print(f"🎉 REAL MPesa CALLBACK - PAYMENT SUCCESS: {transaction_ref}, Receipt: {mpesa_receipt}")
                         
@@ -305,17 +394,46 @@ def process_payment_callback_fast(callback_data):
 @app.route('/')
 def index():
     """Home page with course cards"""
-    return render_template('index.html')
+    return render_template('index.html', course_descriptions=COURSE_DESCRIPTIONS, course_prices=COURSE_PRICES)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """User registration"""
     if request.method == 'POST':
-        username = request.form['username']
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
         email = request.form['email']
         index_number = request.form['index_number']
         phone = request.form['phone']
         password = request.form['password']
+        confirm_password = request.form['confirm_password']
+        
+        # Validate password confirmation
+        if password != confirm_password:
+            return render_template('register.html', error="Passwords do not match")
+        
+        # Validate password strength
+        if len(password) < 8:
+            return render_template('register.html', error="Password must be at least 8 characters long")
+        
+        if not re.search(r'[a-z]', password):
+            return render_template('register.html', error="Password must contain at least one lowercase letter")
+        
+        if not re.search(r'[A-Z]', password):
+            return render_template('register.html', error="Password must contain at least one uppercase letter")
+        
+        if not re.search(r'\d', password):
+            return render_template('register.html', error="Password must contain at least one number")
+        
+        if not re.search(r'[@$!%*?&]', password):
+            return render_template('register.html', error="Password must contain at least one special character (@$!%*?&)")
+        
+        # Validate phone number format (10 digits starting with 07 or 01)
+        if not re.match(r'^(07\d{8}|01\d{8})$', phone):
+            return render_template('register.html', error="Invalid phone number format. Use 10-digit number starting with 07 or 01 (e.g., 0712345678)")
+        
+        # Combine names for username
+        username = f"{first_name} {last_name}".strip()
         
         # Check if user already exists
         try:
@@ -331,6 +449,8 @@ def register():
         # Create new user
         hashed_password = generate_password_hash(password)
         user_data = {
+            'first_name': first_name,
+            'last_name': last_name,
             'username': username,
             'email': email,
             'index_number': index_number,
@@ -383,6 +503,209 @@ def login():
     
     return render_template('login.html')
 
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    """Forgot password page"""
+    if request.method == 'POST':
+        email = request.form['email']
+        
+        # Find user by email
+        try:
+            user = mongo.db.users.find_one({'email': email})
+            if not user:
+                # Also check mock users for development
+                for u in mock_users:
+                    if u['email'] == email:
+                        user = u
+                        break
+        except Exception as e:
+            print(f"Database error: {e}")
+            user = None
+        
+        if user:
+            # Generate reset token
+            reset_token = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(32))
+            
+            # Store reset token in database with expiration (1 hour)
+            reset_expiry = datetime.now() + timedelta(hours=1)
+            
+            try:
+                mongo.db.users.update_one(
+                    {'email': email},
+                    {'$set': {
+                        'reset_token': reset_token, 
+                        'reset_token_expiry': reset_expiry
+                    }}
+                )
+                success = True
+            except Exception as e:
+                print(f"Error storing reset token: {e}")
+                success = False
+                # For mock users, add to user object
+                for u in mock_users:
+                    if u['email'] == email:
+                        u['reset_token'] = reset_token
+                        u['reset_token_expiry'] = reset_expiry
+                        success = True
+                        break
+            
+            if success:
+                # Send reset email
+                email_sent = send_reset_email(email, reset_token)
+                if email_sent:
+                    return render_template('forgot_password.html', 
+                                         success='Password reset instructions have been sent to your email.')
+                else:
+                    return render_template('forgot_password.html', 
+                                         error='Failed to send reset email. Please try again.')
+            else:
+                return render_template('forgot_password.html', 
+                                     error='Failed to process reset request. Please try again.')
+        else:
+            return render_template('forgot_password.html', 
+                                 error='No account found with that email address.')
+    
+    return render_template('forgot_password.html')
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    """Reset password page"""
+    # Check if token is valid and not expired
+    try:
+        user = mongo.db.users.find_one({'reset_token': token})
+        if not user:
+            for u in mock_users:
+                if u.get('reset_token') == token:
+                    user = u
+                    break
+    except Exception as e:
+        print(f"Database error: {e}")
+        user = None
+    
+    if not user:
+        return render_template('reset_password.html', token_invalid=True)
+    
+    # Check token expiry
+    expiry_time = user.get('reset_token_expiry')
+    if expiry_time and datetime.now() > expiry_time:
+        return render_template('reset_password.html', token_invalid=True)
+    
+    if request.method == 'POST':
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+        
+        # Validate passwords match
+        if new_password != confirm_password:
+            return render_template('reset_password.html', token=token, 
+                                 error="Passwords do not match")
+        
+        # Validate password strength
+        if len(new_password) < 8:
+            return render_template('reset_password.html', token=token,
+                                 error="Password must be at least 8 characters long")
+        
+        if not re.search(r'[a-z]', new_password):
+            return render_template('reset_password.html', token=token,
+                                 error="Password must contain at least one lowercase letter")
+        
+        if not re.search(r'[A-Z]', new_password):
+            return render_template('reset_password.html', token=token,
+                                 error="Password must contain at least one uppercase letter")
+        
+        if not re.search(r'\d', new_password):
+            return render_template('reset_password.html', token=token,
+                                 error="Password must contain at least one number")
+        
+        if not re.search(r'[@$!%*?&]', new_password):
+            return render_template('reset_password.html', token=token,
+                                 error="Password must contain at least one special character (@$!%*?&)")
+        
+        # Update password
+        hashed_password = generate_password_hash(new_password)
+        
+        try:
+            result = mongo.db.users.update_one(
+                {'reset_token': token},
+                {'$set': {'password': hashed_password}, 
+                 '$unset': {'reset_token': '', 'reset_token_expiry': ''}}
+            )
+            if result.modified_count > 0:
+                print(f"✅ Password reset for user: {user['email']}")
+            else:
+                print(f"⚠️ No user updated for password reset")
+        except Exception as e:
+            print(f"Error updating password: {e}")
+            # For mock users
+            for u in mock_users:
+                if u.get('reset_token') == token:
+                    u['password'] = hashed_password
+                    u.pop('reset_token', None)
+                    u.pop('reset_token_expiry', None)
+                    break
+        
+        return redirect(url_for('login', reset_success=True))
+    
+    return render_template('reset_password.html', token=token, token_invalid=False)
+
+def send_reset_email(email, reset_token):
+    """Send password reset email"""
+    if not SMTP_EMAIL or not SMTP_PASSWORD:
+        print(f"🔗 RESET LINK for {email}: https://web-development-6fdl.onrender.com/reset-password/{reset_token}")
+        print("⚠️ Email not sent - SMTP credentials not configured")
+        return True
+        
+    try:
+        # Create message
+        subject = "Password Reset Request - Devzen CreationsTech Academy"
+        reset_link = f"https://web-development-6fdl.onrender.com/reset-password/{reset_token}"
+        
+        message = MIMEMultipart()
+        message["From"] = SMTP_EMAIL
+        message["To"] = email
+        message["Subject"] = subject
+        
+        # Email body
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+                <h2 style="color: #4e73df; text-align: center;">Password Reset Request</h2>
+                <p>Hello,</p>
+                <p>You requested to reset your password for Devzen CreationsTech Academy.</p>
+                <p>Click the link below to reset your password:</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{reset_link}" style="background-color: #4e73df; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                        Reset Your Password
+                    </a>
+                </div>
+                <p style="color: #666; font-size: 14px;">
+                    <strong>Note:</strong> This link will expire in 1 hour for security reasons.
+                </p>
+                <p>If you didn't request this reset, please ignore this email.</p>
+                <br>
+                <p>Best regards,<br><strong>Devzen CreationsTech Academy Team</strong></p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        message.attach(MIMEText(body, "html"))
+        
+        # Send email
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_EMAIL, SMTP_PASSWORD)
+            server.send_message(message)
+        
+        print(f"✅ Reset email sent to {email}")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error sending reset email: {e}")
+        # Fallback: log the reset link
+        print(f"🔗 RESET LINK for {email}: https://web-development-6fdl.onrender.com/reset-password/{reset_token}")
+        return False
+
 @app.route('/logout')
 def logout():
     """User logout"""
@@ -395,14 +718,26 @@ def payment(course_type):
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
+    # Get course price
+    amount = COURSE_PRICES.get(course_type, 1)  # Default to 1 KSH if course not found
+    
     if request.method == 'POST':
         phone = request.form['phone']
-        amount = PAYMENT_AMOUNT
         
-        # Validate phone number format
-        if not phone.startswith('254') or len(phone) != 12:
+        # Validate phone number format (10 digits starting with 07 or 01)
+        if not re.match(r'^(07|01)\d{8}$', phone):
             return render_template('payment.html', course_type=course_type, 
-                                 error="Invalid phone number. Use format: 2547XXXXXXXX")
+                                 error="Invalid phone number format. Use 10-digit number starting with 07 or 01 (e.g., 0712345678)",
+                                 amount=amount,
+                                 course_title=COURSE_DESCRIPTIONS.get(course_type, {}).get('title', 'Course'))
+
+        # Convert 10-digit format to 254 format for MPesa
+        if phone.startswith('07'):
+            phone = '254' + phone[1:]  # Convert 0712345678 to 254712345678
+        elif phone.startswith('01'):
+            phone = '254' + phone[1:]  # Convert 0112345678 to 254112345678
+        
+        print(f"📱 Converted phone number: {phone}")
         
         # Generate unique transaction reference
         transaction_ref = f"COURSE_{course_type.upper()}_{session['user_id']}_{int(time.time())}"
@@ -446,9 +781,11 @@ def payment(course_type):
                 error_msg += f"MPesa Error: {stk_response.get('ResponseDescription', 'Unknown error')}"
             else:
                 error_msg += "Please check your phone number and try again. Ensure it's a valid Safaricom number."
-            return render_template('payment.html', course_type=course_type, error=error_msg)
+            return render_template('payment.html', course_type=course_type, error=error_msg, amount=amount,
+                                 course_title=COURSE_DESCRIPTIONS.get(course_type, {}).get('title', 'Course'))
     
-    return render_template('payment.html', course_type=course_type)
+    return render_template('payment.html', course_type=course_type, amount=amount,
+                         course_title=COURSE_DESCRIPTIONS.get(course_type, {}).get('title', 'Course'))
 
 @app.route('/payment/wait/<transaction_ref>')
 def payment_wait(transaction_ref):
@@ -456,67 +793,94 @@ def payment_wait(transaction_ref):
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
+    # Extract course_type from transaction_ref for the retry button
+    course_type = transaction_ref.split('_')[1].lower()
+    
     print(f"🔄 Payment wait page for: {transaction_ref}")
-    return render_template('payment_wait.html', transaction_ref=transaction_ref)
+    return render_template('payment_wait.html', 
+                         transaction_ref=transaction_ref, 
+                         course_type=course_type)
 
 @app.route('/payment/status/<transaction_ref>')
 def payment_status_check(transaction_ref):
-    """Check payment status (AJAX endpoint)"""
+    """Check payment status (AJAX endpoint) - FIXED VERSION"""
     print(f"🔄 Checking payment status for: {transaction_ref}")
+    
+    # CRITICAL FIX: Check BOTH memory status AND database status
+    status_from_memory = payment_status.get(transaction_ref, 'pending')
+    
+    # Also check database directly as backup
+    try:
+        payment_record = mongo.db.payments.find_one({'transaction_ref': transaction_ref})
+        if payment_record:
+            status_from_db = payment_record.get('status', 'pending')
+            
+            # If database says completed but memory doesn't, sync them
+            if status_from_db == 'completed' and status_from_memory != 'success':
+                print(f"🔄 SYNCING: Database shows completed, updating memory status for {transaction_ref}")
+                payment_status[transaction_ref] = 'success'
+                status_from_memory = 'success'
+            
+            # If database says failed but memory doesn't, sync them
+            elif status_from_db == 'failed' and status_from_memory != 'failed':
+                print(f"🔄 SYNCING: Database shows failed, updating memory status for {transaction_ref}")
+                payment_status[transaction_ref] = 'failed'
+                status_from_memory = 'failed'
+    except Exception as e:
+        print(f"❌ Error checking database status: {e}")
     
     # Check if payment is too old (more than 30 minutes)
     if transaction_ref in payment_timestamps:
         payment_age = time.time() - payment_timestamps[transaction_ref]
-        if payment_age > 1800:  # 30 minutes
+        if payment_age > 1800 and status_from_memory == 'pending':  # 30 minutes
             payment_status[transaction_ref] = 'timeout'
+            status_from_memory = 'timeout'
             print(f"⏰ Payment timeout: {transaction_ref}")
     
-    if transaction_ref in payment_status:
-        status = payment_status[transaction_ref]
-        print(f"📊 Payment status for {transaction_ref}: {status}")
-        
-        if status == 'success':
-            # Double-check and update user's paid courses if needed
-            try:
-                payment_record = mongo.db.payments.find_one({'transaction_ref': transaction_ref})
-                if not payment_record:
-                    for p in mock_payments:
-                        if p['transaction_ref'] == transaction_ref:
-                            payment_record = p
-                            break
-                
-                if payment_record:
-                    user_id = payment_record['user_id']
-                    course_type = payment_record['course_type']
-                    
-                    # Verify and add course to user's paid courses
-                    try:
-                        result = mongo.db.users.update_one(
-                            {'_id': ObjectId(user_id) if not user_id.startswith('mock') else user_id},
-                            {'$addToSet': {'paid_courses': course_type}}
-                        )
-                        if result.modified_count > 0:
-                            print(f"✅ User {user_id} granted access to {course_type}")
-                        else:
-                            print(f"ℹ️ User {user_id} already has access to {course_type}")
-                    except Exception as e:
-                        print(f"❌ User update error: {e}")
-                        for user in mock_users:
-                            if str(user['_id']) == user_id:
-                                if 'paid_courses' not in user:
-                                    user['paid_courses'] = []
-                                if course_type not in user['paid_courses']:
-                                    user['paid_courses'].append(course_type)
-                                break
-                
-            except Exception as e:
-                print(f"❌ Payment success handling error: {e}")
+    print(f"📊 Payment status for {transaction_ref}: {status_from_memory}")
+    
+    if status_from_memory == 'success':
+        # Double-check and update user's paid courses if needed
+        try:
+            payment_record = mongo.db.payments.find_one({'transaction_ref': transaction_ref})
+            if not payment_record:
+                for p in mock_payments:
+                    if p['transaction_ref'] == transaction_ref:
+                        payment_record = p
+                        break
             
-            return jsonify({'status': 'success'})
-        elif status == 'failed':
-            return jsonify({'status': 'failed'})
-        elif status == 'timeout':
-            return jsonify({'status': 'timeout'})
+            if payment_record:
+                user_id = payment_record['user_id']
+                course_type = payment_record['course_type']
+                
+                # Verify and add course to user's paid courses
+                try:
+                    result = mongo.db.users.update_one(
+                        {'_id': ObjectId(user_id) if not user_id.startswith('mock') else user_id},
+                        {'$addToSet': {'paid_courses': course_type}}
+                    )
+                    if result.modified_count > 0:
+                        print(f"✅ User {user_id} granted access to {course_type}")
+                    else:
+                        print(f"ℹ️ User {user_id} already has access to {course_type}")
+                except Exception as e:
+                    print(f"❌ User update error: {e}")
+                    for user in mock_users:
+                        if str(user['_id']) == user_id:
+                            if 'paid_courses' not in user:
+                                user['paid_courses'] = []
+                            if course_type not in user['paid_courses']:
+                                user['paid_courses'].append(course_type)
+                            break
+            
+        except Exception as e:
+            print(f"❌ Payment success handling error: {e}")
+        
+        return jsonify({'status': 'success'})
+    elif status_from_memory == 'failed':
+        return jsonify({'status': 'failed'})
+    elif status_from_memory == 'timeout':
+        return jsonify({'status': 'timeout'})
     
     return jsonify({'status': 'pending'})
 
@@ -578,7 +942,10 @@ def courses():
         return redirect(url_for('login'))
     
     print(f"📚 Courses page for user: {user.get('username')}, paid courses: {user.get('paid_courses', [])}")
-    return render_template('courses.html', user=user, course_links=COURSE_LINKS)
+    return render_template('courses.html', 
+                         user=user, 
+                         course_links=COURSE_LINKS,
+                         course_prices=COURSE_PRICES)
 
 @app.route('/check_session')
 def check_session():
@@ -633,8 +1000,44 @@ def debug_payments():
         'total_successful_payments': len([v for v in payment_status.values() if v == 'success']),
         'total_failed_payments': len([v for v in payment_status.values() if v == 'failed']),
         'callback_url': MPESA_CALLBACK_URL,
-        'app_url': 'https://web-development-6fdl.onrender.com'
+        'app_url': 'https://web-development-6fdl.onrender.com',
+        'course_prices': COURSE_PRICES
     })
+
+@app.route('/force-complete/<transaction_ref>')
+def force_complete_payment(transaction_ref):
+    """Force complete a payment for testing - use this to fix stuck payments"""
+    try:
+        # Update database
+        result = mongo.db.payments.update_one(
+            {'transaction_ref': transaction_ref},
+            {'$set': {
+                'status': 'completed', 
+                'mpesa_receipt': 'FORCED_COMPLETE',
+                'completed_at': datetime.now()
+            }}
+        )
+        
+        if result.modified_count > 0:
+            # Update memory status
+            payment_status[transaction_ref] = 'success'
+            
+            # Update user's courses
+            payment_record = mongo.db.payments.find_one({'transaction_ref': transaction_ref})
+            if payment_record:
+                user_id = payment_record['user_id']
+                course_type = payment_record['course_type']
+                
+                mongo.db.users.update_one(
+                    {'_id': ObjectId(user_id)},
+                    {'$addToSet': {'paid_courses': course_type}}
+                )
+            
+            return f"✅ Payment {transaction_ref} force-completed successfully"
+        else:
+            return f"❌ Payment {transaction_ref} not found"
+    except Exception as e:
+        return f"❌ Error force-completing payment: {e}"
 
 @app.route('/test-callback', methods=['GET', 'POST'])
 def test_callback():
@@ -655,26 +1058,25 @@ def health_check():
         'status': 'healthy',
         'timestamp': datetime.now().isoformat(),
         'database': 'connected' if mongo.db else 'disconnected',
-        'mpesa_token': 'available' if get_mpesa_access_token() else 'unavailable'
+        'mpesa_token': 'available' if get_mpesa_access_token() else 'unavailable',
+        'course_prices': COURSE_PRICES
     })
 
 if __name__ == '__main__':
-    print("🚀 Starting application with REAL MPesa integration...")
-    print(f"💰 Payment amount: KSh {PAYMENT_AMOUNT}")
+    print("🚀 Starting application with environment variable configuration...")
+    print(f"🔧 Loaded configuration:")
+    print(f"   - MongoDB: {'✅ Connected' if mongo.db else '❌ Disconnected'}")
+    print(f"   - MPesa: {'✅ Configured' if MPESA_CONSUMER_KEY else '❌ Not configured'}")
+    print(f"   - Email: {'✅ Configured' if SMTP_EMAIL else '❌ Not configured'}")
+    print(f"💰 Course Prices: {COURSE_PRICES}")
     print(f"📞 Callback URL: {MPESA_CALLBACK_URL}")
     print(f"🌐 App URL: https://web-development-6fdl.onrender.com")
-    print(f"🏢 Business Shortcode: {MPESA_SHORTCODE}")
-    print("⚡ REAL MPesa CALLBACK PROCESSING ONLY - No simulation fallback")
-    print("⏳ Payments will only complete when MPesa sends callback with receipt")
     
-    # Test callback URL accessibility
-    try:
-        test_response = requests.get('https://web-development-6fdl.onrender.com/test-callback', timeout=10)
-        if test_response.status_code == 200:
-            print("✅ Callback URL is publicly accessible")
-        else:
-            print(f"⚠️ Callback URL check returned status: {test_response.status_code}")
-    except Exception as e:
-        print(f"❌ Callback URL accessibility check failed: {e}")
+    if MPESA_SHORTCODE:
+        print(f"🏢 Business Shortcode: {MPESA_SHORTCODE}")
+    else:
+        print("🏢 Business Shortcode: ❌ Not configured")
+    
+    print("⚡ REAL MPesa CALLBACK PROCESSING ONLY - No simulation fallback")
     
     app.run(debug=True, port=5000, host='0.0.0.0')

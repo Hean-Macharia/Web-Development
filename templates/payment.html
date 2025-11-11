@@ -1,39 +1,276 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="text-center">Payment for {{ course_type|title }} Course</h3>
-            </div>
-            <div class="card-body">
-                {% if error %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endif %}
-
-                <div class="alert alert-info">
-                    <h5>Course Fee: KSh 500</h5>
-                    <p>You will receive an M-Pesa STK push prompt on your phone to complete the payment.</p>
+<div class="container-fluid min-vh-100 py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="row justify-content-center">
+        <div class="col-xl-4 col-lg-5 col-md-6 col-sm-8">
+            <div class="card shadow-2xl border-0">
+                <div class="card-header bg-primary text-white text-center py-4 position-relative overflow-hidden">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-white bg-opacity-10"></div>
+                    <div class="position-relative z-1">
+                        <div class="avatar-circle bg-white bg-opacity-20 p-3 rounded-circle d-inline-flex mb-3">
+                            <i class="fas fa-credit-card fa-2x text-white"></i>
+                        </div>
+                        <h2 class="fw-bold mb-2">Complete Payment</h2>
+                        <p class="mb-0 opacity-90">{{ course_title }} - KSh {{ amount }}</p>
+                    </div>
                 </div>
 
-                <form method="POST">
-                    <div class="mb-3">
-                        <label for="phone" class="form-label">Safaricom Phone Number</label>
-                        <input type="tel" class="form-control" id="phone" name="phone"
-                            value="{{ session.get('user_phone', '') }}" placeholder="2547XXXXXXXX" pattern="2547\d{8}"
-                            required>
-                        <div class="form-text">Ensure this is the number registered with M-Pesa</div>
+                <div class="card-body p-4 p-md-5">
+                    {% if error %}
+                    <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                        <i class="fas fa-exclamation-triangle me-3 fs-5"></i>
+                        <div class="flex-grow-1">
+                            <strong class="d-block">Payment Error</strong>
+                            <span class="small">{{ error }}</span>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+
+                    <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+                        <i class="fas fa-info-circle me-3 fs-5"></i>
+                        <div class="flex-grow-1">
+                            <strong class="d-block">Payment Instructions</strong>
+                            <span class="small">You will receive an M-Pesa STK push prompt on your phone to complete the
+                                payment of KSh {{ amount }}.</span>
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn btn-success w-100">Pay KSh 500 via M-Pesa</button>
-                </form>
+                    <form method="POST" id="paymentForm">
+                        <div class="mb-4">
+                            <label for="phone" class="form-label fw-semibold text-dark">
+                                <i class="fas fa-mobile-alt me-2 text-primary"></i>Safaricom Phone Number
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-phone text-muted"></i>
+                                </span>
+                                <input type="tel" class="form-control" id="phone" name="phone"
+                                    placeholder="0712345678 or 0112345678" pattern="(07|01)\d{8}" maxlength="10"
+                                    required>
+                            </div>
+                            <div class="form-text text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Enter your 10-digit Safaricom number starting with 07 or 01 (e.g., 0712345678)
+                            </div>
+                            <div class="invalid-feedback" id="phoneError">
+                                Please enter a valid 10-digit Safaricom number starting with 07 or 01.
+                            </div>
+                        </div>
 
-                <div class="text-center mt-3">
-                    <a href="{{ url_for('courses') }}" class="btn btn-outline-secondary">Cancel</a>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold" id="payButton">
+                                <i class="fas fa-paper-plane me-2"></i>Pay KSh {{ amount }} via M-Pesa
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4 pt-3 border-top">
+                        <p class="text-muted mb-2">Changed your mind?</p>
+                        <a href="{{ url_for('courses') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Courses
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const phoneInput = document.getElementById('phone');
+        const paymentForm = document.getElementById('paymentForm');
+        const payButton = document.getElementById('payButton');
+
+        // Format phone number input
+        phoneInput.addEventListener('input', function (e) {
+            // Remove any non-digit characters
+            let value = e.target.value.replace(/\D/g, '');
+
+            // Limit to 10 digits
+            if (value.length > 10) {
+                value = value.slice(0, 10);
+            }
+
+            // Update the input value
+            e.target.value = value;
+
+            // Validate the format
+            validatePhoneNumber();
+        });
+
+        // Validate phone number format
+        function validatePhoneNumber() {
+            const phoneValue = phoneInput.value;
+            const phonePattern = /^(07|01)\d{8}$/;
+
+            if (phoneValue && !phonePattern.test(phoneValue)) {
+                phoneInput.classList.add('is-invalid');
+                return false;
+            } else {
+                phoneInput.classList.remove('is-invalid');
+                return true;
+            }
+        }
+
+        // Form submission validation
+        paymentForm.addEventListener('submit', function (e) {
+            if (!validatePhoneNumber()) {
+                e.preventDefault();
+                return;
+            }
+
+            // Show loading state
+            payButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            payButton.disabled = true;
+        });
+
+        // Real-time validation on blur
+        phoneInput.addEventListener('blur', function () {
+            validatePhoneNumber();
+        });
+
+        // Clear validation on focus
+        phoneInput.addEventListener('focus', function () {
+            phoneInput.classList.remove('is-invalid');
+        });
+    });
+</script>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+    }
+
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        border: none;
+    }
+
+    .avatar-circle {
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        transition: transform 0.3s ease;
+    }
+
+    .avatar-circle:hover {
+        transform: scale(1.05);
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        transform: translateY(-1px);
+    }
+
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+    .btn {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        border: none;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(78, 115, 223, 0.4);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .btn-outline-primary {
+        border: 2px solid #4e73df;
+        color: #4e73df;
+        font-weight: 600;
+    }
+
+    .btn-outline-primary:hover {
+        background: #4e73df;
+        border-color: #4e73df;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .shadow-2xl {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-right: none;
+        transition: all 0.3s ease;
+    }
+
+    .input-group .form-control {
+        border-left: none;
+    }
+
+    .alert {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Loading animation */
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .btn-primary:disabled {
+        animation: pulse 2s infinite;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 2rem !important;
+        }
+
+        .btn-lg {
+            padding: 0.875rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .avatar-circle {
+            width: 60px;
+            height: 60px;
+            padding: 1rem !important;
+        }
+
+        .avatar-circle i {
+            font-size: 1.5rem !important;
+        }
+    }
+</style>
 {% endblock %}
