@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
+from functools import wraps
 import requests
 import base64
 import json
@@ -496,7 +497,12 @@ def login():
             session['user_id'] = str(user.get('_id', 'mock_id'))
             session['username'] = user['username']
             session['login_time'] = datetime.now().isoformat()
+            session['is_admin'] = user.get('email') in ADMIN_EMAILS
+            
             print(f"✅ User logged in: {email}")
+            if session['is_admin']:
+                print(f"👑 Admin user logged in: {email}")
+                return redirect(url_for('admin_dashboard'))
             return redirect(url_for('courses'))
         else:
             return render_template('login.html', error="Invalid credentials")
@@ -1039,6 +1045,189 @@ def force_complete_payment(transaction_ref):
     except Exception as e:
         return f"❌ Error force-completing payment: {e}"
 
+ADMIN_EMAILS = os.getenv('ADMIN_EMAILS', 'admin@devzencreations.com').split(',')
+print(f"🔧 Admin emails: {ADMIN_EMAILS}")
+
+# Admin decorator
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        
+        # Get current user
+        try:
+            user = mongo.db.users.find_one({'_id': ObjectId(session['user_id'])})
+            if not user:
+                for u in mock_users:
+                    if str(u['_id']) == session['user_id']:
+                        user = u
+                        break
+        except Exception as e:
+            print(f"Admin check error: {e}")
+            return redirect(url_for('login'))
+        
+        # Check if user is admin
+        if user and user.get('email') in ADMIN_EMAILS:
+            return f(*args, **kwargs)
+        else:
+            return "Access denied: Admin privileges required", 403
+    return decorated_function
+
+# Add these new routes after your existing routes
+
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    """Admin dashboard"""
+    try:
+        # Get statistics
+        total_users = mongo.db.users.count_documents({})
+        total_payments = mongo.db.payments.count_documents({})
+        successful_payments = mongo.db.payments.count_documents({'status': 'completed'})
+        pending_payments = mongo.db.payments.count_documents({'status': 'pending'})
+        
+        # Get recent users
+        recent_users = list(mongo.db.users.find().sort('created_at', -1).limit(10))
+        
+        # Get recent payments
+        recent_payments = list(mongo.db.payments.find().sort('created_at', -1).limit(10))
+        
+        # Course statistics
+        course_stats = {}
+        for course_type in COURSE_PRICES.keys():
+            course_count = mongo.db.payments.count_documents({
+                'course_type': course_type, 
+                'status': 'completed'
+            })
+            course_stats[course_type] = course_count
+        
+    except Exception as e:
+        print(f"Admin dashboard error: {e}")
+        total_users = len(mock_users)
+        total_payments = len(mock_payments)
+        successful_payments = len([p for p in mock_payments if p.get('status') == 'completed'])
+        pending_payments = len([p for p in mock_payments if p.get('status') == 'pending'])
+        recent_users = mock_users[-10:] if mock_users else []
+        recent_payments = mock_payments[-10:] if mock_payments else []
+        course_stats = {}
+    
+    return render_template('admin_dashboard.html',
+                         total_users=total_users,
+                         total_payments=total_payments,
+                         successful_payments=successful_payments,
+                         pending_payments=pending_payments,
+                         recent_users=recent_users,
+                         recent_payments=recent_payments,
+                         course_stats=course_stats,
+                         course_descriptions=COURSE_DESCRIPTIONS)
+
+@app.route('/admin/users')
+@admin_required
+def admin_users():
+    """Admin users management"""
+    try:
+        users = list(mongo.db.users.find().sort('created_at', -1))
+    except Exception as e:
+        print(f"Admin users error: {e}")
+        users = mock_users
+    
+    return render_template('admin_users.html', users=users)
+
+@app.route('/admin/payments')
+@admin_required
+def admin_payments():
+    """Admin payments management"""
+    try:
+        payments = list(mongo.db.payments.find().sort('created_at', -1))
+        # Join with users to get user details
+        for payment in payments:
+            try:
+                user = mongo.db.users.find_one({'_id': ObjectId(payment['user_id'])})
+                if user:
+                    payment['user_email'] = user.get('email', 'Unknown')
+                    payment['user_name'] = user.get('username', 'Unknown')
+                else:
+                    payment['user_email'] = 'User not found'
+                    payment['user_name'] = 'User not found'
+            except:
+                payment['user_email'] = 'Invalid user ID'
+                payment['user_name'] = 'Invalid user ID'
+    except Exception as e:
+        print(f"Admin payments error: {e}")
+        payments = mock_payments
+        for payment in payments:
+            payment['user_email'] = 'Mock user'
+            payment['user_name'] = 'Mock user'
+    
+    return render_template('admin_payments.html', payments=payments, course_descriptions=COURSE_DESCRIPTIONS)
+
+@app.route('/admin/user/<user_id>')
+@admin_required
+def admin_user_detail(user_id):
+    """Admin user detail view"""
+    try:
+        user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
+        if not user:
+            for u in mock_users:
+                if str(u['_id']) == user_id:
+                    user = u
+                    break
+    except Exception as e:
+        print(f"Admin user detail error: {e}")
+        user = None
+    
+    if not user:
+        return "User not found", 404
+    
+    # Get user's payments
+    try:
+        user_payments = list(mongo.db.payments.find({'user_id': user_id}).sort('created_at', -1))
+    except Exception as e:
+        print(f"User payments error: {e}")
+        user_payments = [p for p in mock_payments if p.get('user_id') == user_id]
+    
+    return render_template('admin_user_detail.html', user=user, payments=user_payments, course_descriptions=COURSE_DESCRIPTIONS)
+
+@app.route('/admin/toggle-user/<user_id>', methods=['POST'])
+@admin_required
+def admin_toggle_user(user_id):
+    """Toggle user active status"""
+    try:
+        user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
+        if user:
+            new_status = not user.get('is_active', True)
+            mongo.db.users.update_one(
+                {'_id': ObjectId(user_id)},
+                {'$set': {'is_active': new_status}}
+            )
+            return jsonify({'success': True, 'is_active': new_status})
+    except Exception as e:
+        print(f"Toggle user error: {e}")
+    
+    return jsonify({'success': False, 'error': 'Failed to update user'})
+
+@app.route('/admin/delete-user/<user_id>', methods=['POST'])
+@admin_required
+def admin_delete_user(user_id):
+    """Delete user (admin only)"""
+    try:
+        # Don't allow admin to delete themselves
+        current_user = mongo.db.users.find_one({'_id': ObjectId(session['user_id'])})
+        if current_user and str(current_user['_id']) == user_id:
+            return jsonify({'success': False, 'error': 'Cannot delete your own account'})
+        
+        result = mongo.db.users.delete_one({'_id': ObjectId(user_id)})
+        if result.deleted_count > 0:
+            # Also delete user's payments
+            mongo.db.payments.delete_many({'user_id': user_id})
+            return jsonify({'success': True})
+    except Exception as e:
+        print(f"Delete user error: {e}")
+    
+    return jsonify({'success': False, 'error': 'Failed to delete user'})
+
+
 @app.route('/test-callback', methods=['GET', 'POST'])
 def test_callback():
     """Test if callback URL is accessible"""
@@ -1065,7 +1254,7 @@ def health_check():
 if __name__ == '__main__':
     print("🚀 Starting application with environment variable configuration...")
     print(f"🔧 Loaded configuration:")
-    print(f"   - MongoDB: {'✅ Connected' if mongo.db else '❌ Disconnected'}")
+    print(f"   - MongoDB: {'✅ Connected' if mongo.db is not None else '❌ Disconnected'}")
     print(f"   - MPesa: {'✅ Configured' if MPESA_CONSUMER_KEY else '❌ Not configured'}")
     print(f"   - Email: {'✅ Configured' if SMTP_EMAIL else '❌ Not configured'}")
     print(f"💰 Course Prices: {COURSE_PRICES}")
