@@ -89,11 +89,11 @@ if missing_vars:
 if not SMTP_EMAIL or not SMTP_PASSWORD:
     print("⚠️  Missing email configuration - password reset emails will not be sent")
 
-# Payment settings - Different prices for different courses
+# Payment settings - All courses now cost 500 KSH
 COURSE_PRICES = {
-    'webdev': 1,      # 1 KSH for testing
-    'graphic': 1,     # 1 KSH for testing  
-    'cybersecurity': 2  # 2 KSH for testing (different price)
+    'webdev': 500,      # 500 KSH for all courses
+    'graphic': 500,     # 500 KSH for all courses  
+    'cybersecurity': 500  # 500 KSH for all courses
 }
 
 SIMULATION_MODE = False  # DISABLED - Using real MPesa
@@ -399,7 +399,7 @@ def index():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    """User registration"""
+    """User registration with improved validation"""
     if request.method == 'POST':
         first_name = request.form['first_name']
         last_name = request.form['last_name']
@@ -436,16 +436,27 @@ def register():
         # Combine names for username
         username = f"{first_name} {last_name}".strip()
         
-        # Check if user already exists
+        # IMPROVED VALIDATION: Check if user already exists by email OR index number
         try:
-            existing_user = mongo.db.users.find_one({'$or': [{'email': email}, {'index_number': index_number}]})
-            if existing_user:
-                return render_template('register.html', error="User with this email or index number already exists")
+            existing_user_by_email = mongo.db.users.find_one({'email': email})
+            existing_user_by_index = mongo.db.users.find_one({'index_number': index_number})
+            
+            if existing_user_by_email or existing_user_by_index:
+                error_message = "User already exists. "
+                if existing_user_by_email:
+                    error_message += f"A user with email '{email}' is already registered. "
+                if existing_user_by_index:
+                    error_message += f"A user with index number '{index_number}' is already registered."
+                return render_template('register.html', error=error_message.strip())
+                
         except Exception as e:
-            print(f"Database error: {e}")
+            print(f"Database error during user check: {e}")
+            # Fallback to mock user check
             for user in mock_users:
-                if user['email'] == email or user['index_number'] == index_number:
-                    return render_template('register.html', error="User with this email or index number already exists")
+                if user['email'] == email:
+                    return render_template('register.html', error=f"A user with email '{email}' is already registered.")
+                if user['index_number'] == index_number:
+                    return render_template('register.html', error=f"A user with index number '{index_number}' is already registered.")
         
         # Create new user
         hashed_password = generate_password_hash(password)
@@ -464,7 +475,7 @@ def register():
         try:
             result = mongo.db.users.insert_one(user_data)
             user_data['_id'] = result.inserted_id
-            print(f"✅ User registered: {email}")
+            print(f"✅ User registered successfully: {email} (Index: {index_number})")
         except Exception as e:
             print(f"Insert error, using mock: {e}")
             user_data['_id'] = f"mock_{len(mock_users)}"
@@ -720,12 +731,12 @@ def logout():
 
 @app.route('/payment/<course_type>', methods=['GET', 'POST'])
 def payment(course_type):
-    """Payment page - REAL MPESA ONLY"""
+    """Payment page - REAL MPESA ONLY - 500 KSH"""
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    # Get course price
-    amount = COURSE_PRICES.get(course_type, 1)  # Default to 1 KSH if course not found
+    # Get course price - now fixed at 500 KSH for all courses
+    amount = COURSE_PRICES.get(course_type, 500)  # Default to 500 KSH if course not found
     
     if request.method == 'POST':
         phone = request.form['phone']
@@ -1252,20 +1263,4 @@ def health_check():
     })
 
 if __name__ == '__main__':
-    print("🚀 Starting application with environment variable configuration...")
-    print(f"🔧 Loaded configuration:")
-    print(f"   - MongoDB: {'✅ Connected' if mongo.db is not None else '❌ Disconnected'}")
-    print(f"   - MPesa: {'✅ Configured' if MPESA_CONSUMER_KEY else '❌ Not configured'}")
-    print(f"   - Email: {'✅ Configured' if SMTP_EMAIL else '❌ Not configured'}")
-    print(f"💰 Course Prices: {COURSE_PRICES}")
-    print(f"📞 Callback URL: {MPESA_CALLBACK_URL}")
-    print(f"🌐 App URL: https://web-development-6fdl.onrender.com")
-    
-    if MPESA_SHORTCODE:
-        print(f"🏢 Business Shortcode: {MPESA_SHORTCODE}")
-    else:
-        print("🏢 Business Shortcode: ❌ Not configured")
-    
-    print("⚡ REAL MPesa CALLBACK PROCESSING ONLY - No simulation fallback")
-    
     app.run(debug=True, port=5000, host='0.0.0.0')
