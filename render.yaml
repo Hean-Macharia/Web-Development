@@ -1,11 +1,9 @@
 services:
   - type: web
     name: web-development
-    env: python
-    pythonVersion: 3.12.3
+    runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
-    plan: free
     envVars:
-      - key: FLASK_ENV
-        value: production
+      - key: PYTHON_VERSION
+        value: 3.11.9
