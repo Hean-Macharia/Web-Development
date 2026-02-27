@@ -5,4 +5,7 @@ services:
     pythonVersion: 3.12.3
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
-    plan: free   # or standard, depending on your Render plan
+    plan: free
+    envVars:
+      - key: FLASK_ENV
+        value: production
