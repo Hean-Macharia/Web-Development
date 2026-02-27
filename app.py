@@ -65,7 +65,7 @@ MPESA_CONSUMER_KEY = os.getenv('MPESA_CONSUMER_KEY')
 MPESA_CONSUMER_SECRET = os.getenv('MPESA_CONSUMER_SECRET')
 MPESA_PASSKEY = os.getenv('MPESA_PASSKEY')
 MPESA_SHORTCODE = os.getenv('MPESA_SHORTCODE')
-MPESA_CALLBACK_URL = os.getenv('MPESA_CALLBACK_URL', 'https://web-development-6fdl.onrender.com/callback')
+MPESA_CALLBACK_URL = os.getenv('MPESA_CALLBACK_URL', 'https://short-courses.onrender.com/callback')
 
 # Email configuration from environment variables
 SMTP_SERVER = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
@@ -667,14 +667,14 @@ def reset_password(token):
 def send_reset_email(email, reset_token):
     """Send password reset email"""
     if not SMTP_EMAIL or not SMTP_PASSWORD:
-        print(f"🔗 RESET LINK for {email}: https://web-development-6fdl.onrender.com/reset-password/{reset_token}")
+        print(f"🔗 RESET LINK for {email}: https://short-courses.onrender.com/reset-password/{reset_token}")
         print("⚠️ Email not sent - SMTP credentials not configured")
         return True
         
     try:
         # Create message
         subject = "Password Reset Request - Devzen CreationsTech Academy"
-        reset_link = f"https://web-development-6fdl.onrender.com/reset-password/{reset_token}"
+        reset_link = f"https://short-courses.onrender.com/reset-password/{reset_token}"
         
         message = MIMEMultipart()
         message["From"] = SMTP_EMAIL
@@ -720,7 +720,7 @@ def send_reset_email(email, reset_token):
     except Exception as e:
         print(f"❌ Error sending reset email: {e}")
         # Fallback: log the reset link
-        print(f"🔗 RESET LINK for {email}: https://web-development-6fdl.onrender.com/reset-password/{reset_token}")
+        print(f"🔗 RESET LINK for {email}: https://short-courses.onrender.com/reset-password/{reset_token}")
         return False
 
 @app.route('/logout')
@@ -1017,7 +1017,7 @@ def debug_payments():
         'total_successful_payments': len([v for v in payment_status.values() if v == 'success']),
         'total_failed_payments': len([v for v in payment_status.values() if v == 'failed']),
         'callback_url': MPESA_CALLBACK_URL,
-        'app_url': 'https://web-development-6fdl.onrender.com',
+        'app_url': 'https://short-courses.onrender.com',
         'course_prices': COURSE_PRICES
     })
 
@@ -1247,7 +1247,7 @@ def test_callback():
         'timestamp': datetime.now().isoformat(),
         'method': request.method,
         'data_received': request.get_json() if request.method == 'POST' else None,
-        'app_url': 'https://web-development-6fdl.onrender.com',
+        'app_url': 'https://short-courses.onrender.com',
         'callback_url': MPESA_CALLBACK_URL
     })
 
