@@ -197,7 +197,7 @@
     <!-- Features Section -->
     <div class="row justify-content-center mt-5 pt-5">
         <div class="col-lg-8 text-center">
-            <h2 class="h1 fw-bold mb-5">Why Choose LearnTech Academy?</h2>
+            <h2 class="h1 fw-bold mb-5">Why Choose Devzen CreationsTech Academy?</h2>
             <div class="row g-4">
                 <div class="col-md-4">
                     <div class="feature-card p-4">
@@ -228,6 +228,129 @@
                         <h5>Flexible Learning</h5>
                         <p class="text-muted">Study at your own pace with lifetime access to materials</p>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testimonials Section - Single Horizontal Row -->
+    <div class="row justify-content-center mt-5 pt-5">
+        <div class="col-lg-12">
+            <div class="text-center mb-5">
+                <span class="badge bg-primary bg-opacity-10 text-primary px-4 py-2 mb-3 fs-6">
+                    <i class="fas fa-heart me-2"></i>Trusted by 10,000+ Students
+                </span>
+                <h2 class="h1 fw-bold mb-3">What Our <span class="text-primary">100+ Students</span> Say</h2>
+                <p class="lead text-muted">Join thousands of satisfied learners who transformed their careers with us</p>
+            </div>
+
+            <!-- Rating Summary -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8">
+                    <div class="card border-0 bg-light p-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-4 text-center border-md-end">
+                                <h1 class="display-2 fw-bold text-primary mb-0">4.8</h1>
+                                <div class="text-warning fs-4 mb-2">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <p class="text-muted mb-0">Average Rating</p>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="rating-bars">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="me-2" style="min-width: 60px;">5 Stars</span>
+                                        <div class="progress flex-grow-1" style="height: 8px;">
+                                            <div class="progress-bar bg-success" style="width: 85%"></div>
+                                        </div>
+                                        <span class="ms-2 text-muted small">85%</span>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="me-2" style="min-width: 60px;">4 Stars</span>
+                                        <div class="progress flex-grow-1" style="height: 8px;">
+                                            <div class="progress-bar bg-success" style="width: 12%"></div>
+                                        </div>
+                                        <span class="ms-2 text-muted small">12%</span>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="me-2" style="min-width: 60px;">3 Stars</span>
+                                        <div class="progress flex-grow-1" style="height: 8px;">
+                                            <div class="progress-bar bg-warning" style="width: 2%"></div>
+                                        </div>
+                                        <span class="ms-2 text-muted small">2%</span>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="me-2" style="min-width: 60px;">2 Stars</span>
+                                        <div class="progress flex-grow-1" style="height: 8px;">
+                                            <div class="progress-bar bg-danger" style="width: 1%"></div>
+                                        </div>
+                                        <span class="ms-2 text-muted small">1%</span>
+                                    </div>
+                                </div>
+                                <p class="text-muted small mt-3 mb-0">
+                                    <i class="fas fa-check-circle text-success me-1"></i>
+                                    Based on 10,247 reviews from verified students
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="row justify-content-center mb-4">
+                <div class="col-lg-8">
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <button class="btn filter-btn active" data-filter="all">
+                            <i class="fas fa-list-ul me-2"></i>All Reviews
+                        </button>
+                        <button class="btn filter-btn" data-filter="webdev">
+                            <i class="fas fa-code me-2"></i>Web Development
+                        </button>
+                        <button class="btn filter-btn" data-filter="graphic">
+                            <i class="fas fa-palette me-2"></i>Graphic Design
+                        </button>
+                        <button class="btn filter-btn" data-filter="cybersecurity">
+                            <i class="fas fa-shield-alt me-2"></i>Cyber Security
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Single Horizontal Row of Testimonials -->
+            <div class="testimonials-wrapper position-relative">
+                <div class="testimonials-row" id="testimonialsRow">
+                    <!-- Testimonials will be loaded here dynamically -->
+                </div>
+                
+                <!-- Scroll Buttons -->
+                <button class="scroll-btn scroll-left" id="scrollLeft" onclick="scrollTestimonials('left')">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="scroll-btn scroll-right" id="scrollRight" onclick="scrollTestimonials('right')">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Load More Button -->
+            <div class="row justify-content-center mt-5">
+                <div class="col-auto">
+                    <button class="btn btn-primary btn-lg px-5" id="loadMoreBtn" onclick="loadMoreTestimonials()">
+                        <i class="fas fa-sync-alt me-2"></i>Load More Reviews
+                    </button>
+                </div>
+            </div>
+
+            <!-- Review Counter -->
+            <div class="row justify-content-center mt-4">
+                <div class="col-auto">
+                    <p class="text-muted">
+                        Showing <span id="displayedCount">6</span> of <span id="totalCount">100</span> reviews
+                    </p>
                 </div>
             </div>
         </div>
@@ -306,57 +429,510 @@
         border: none;
     }
 
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .display-4 {
-            font-size: 2rem;
-        }
-
-        .course-card {
-            margin-bottom: 2rem;
-        }
-
-        .btn-lg {
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-        }
+    /* Testimonials Styles - Single Row */
+    .testimonials-wrapper {
+        position: relative;
+        padding: 0 40px;
+        max-width: 1400px;
+        margin: 0 auto;
     }
 
-    /* Animation for page load */
+    .testimonials-row {
+        display: flex;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        gap: 1.5rem;
+        padding: 1rem 0.5rem 2rem 0.5rem;
+        scrollbar-width: thin;
+        scrollbar-color: #4e73df #e9ecef;
+    }
+
+    .testimonials-row::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .testimonials-row::-webkit-scrollbar-track {
+        background: #e9ecef;
+        border-radius: 10px;
+    }
+
+    .testimonials-row::-webkit-scrollbar-thumb {
+        background: #4e73df;
+        border-radius: 10px;
+    }
+
+    .testimonials-row::-webkit-scrollbar-thumb:hover {
+        background: #224abe;
+    }
+
+    .testimonial-card {
+        flex: 0 0 350px;
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.02);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        border-color: transparent;
+    }
+
+    .testimonial-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #4e73df, #1cc88a, #e74a3b);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .testimonial-card:hover::before {
+        opacity: 1;
+    }
+
+    .testimonial-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #fff;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .testimonial-text {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #4a5568;
+        margin: 1rem 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .testimonial-author {
+        border-top: 1px solid #edf2f7;
+        padding-top: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .testimonial-author h6 {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+        color: #2d3748;
+    }
+
+    .testimonial-author p {
+        font-size: 0.85rem;
+        margin-bottom: 0;
+    }
+
+    /* Rating Stars */
+    .rating-stars {
+        color: #fbbf24;
+        font-size: 0.85rem;
+        letter-spacing: 2px;
+    }
+
+    /* Course Badge */
+    .course-badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 2rem;
+        font-weight: 500;
+        display: inline-block;
+    }
+
+    .course-badge.webdev {
+        background: rgba(78, 115, 223, 0.1);
+        color: #4e73df;
+    }
+
+    .course-badge.graphic {
+        background: rgba(28, 200, 138, 0.1);
+        color: #1cc88a;
+    }
+
+    .course-badge.cybersecurity {
+        background: rgba(231, 74, 59, 0.1);
+        color: #e74a3b;
+    }
+
+    /* Filter Buttons */
+    .filter-btn {
+        border-radius: 2rem !important;
+        padding: 0.6rem 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        border: 1px solid #dee2e6;
+        color: #6c757d;
+        background: white;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        background: #4e73df;
+        color: white;
+        border-color: #4e73df;
+    }
+
+    .filter-btn i {
+        font-size: 0.9rem;
+    }
+
+    /* Scroll Buttons */
+    .scroll-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        border: 1px solid #dee2e6;
+        color: #4e73df;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 10;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .scroll-btn:hover {
+        background: #4e73df;
+        color: white;
+        border-color: #4e73df;
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .scroll-left {
+        left: 0;
+    }
+
+    .scroll-right {
+        right: 0;
+    }
+
+    /* Animation */
     @keyframes fadeInUp {
         from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(20px);
         }
-
         to {
             opacity: 1;
             transform: translateY(0);
         }
     }
 
-    .course-card {
+    .course-card,
+    .feature-card,
+    .testimonial-card {
         animation: fadeInUp 0.6s ease-out;
     }
 
-    .course-card:nth-child(2) {
-        animation-delay: 0.2s;
-    }
+    /* Responsive */
+    @media (max-width: 768px) {
+        .display-4 {
+            font-size: 2rem;
+        }
 
-    .course-card:nth-child(3) {
-        animation-delay: 0.4s;
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .filter-btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .testimonials-wrapper {
+            padding: 0 20px;
+        }
+
+        .testimonial-card {
+            flex: 0 0 280px;
+        }
+
+        .scroll-btn {
+            width: 32px;
+            height: 32px;
+        }
     }
 </style>
 
 <script>
-    // Add intersection observer for scroll animations
-    document.addEventListener('DOMContentLoaded', function () {
+    // Generate 100+ testimonials
+    const testimonialsData = [
+        // Kenyan Students (50)
+        ...Array(50).fill().map((_, i) => ({
+            id: i + 1,
+            name: getKenyanName(i),
+            avatar: `https://randomuser.me/api/portraits/${i % 2 === 0 ? 'women' : 'men'}/${(i % 70) + 1}.jpg`,
+            rating: Math.floor(Math.random() * 2) + 4, // 4 or 5 stars
+            course: ['webdev', 'graphic', 'cybersecurity'][Math.floor(Math.random() * 3)],
+            text: getTestimonialText(i),
+            position: getJobPosition(i),
+            company: getKenyanCompany(i),
+            date: getRandomDate()
+        })),
+        // International Students (50)
+        ...Array(50).fill().map((_, i) => ({
+            id: i + 51,
+            name: getInternationalName(i),
+            avatar: `https://randomuser.me/api/portraits/${(i + 50) % 2 === 0 ? 'women' : 'men'}/${((i + 50) % 70) + 1}.jpg`,
+            rating: Math.floor(Math.random() * 2) + 4,
+            course: ['webdev', 'graphic', 'cybersecurity'][Math.floor(Math.random() * 3)],
+            text: getInternationalTestimonial(i),
+            position: getInternationalJobPosition(i),
+            company: getInternationalCompany(i),
+            date: getRandomDate()
+        }))
+    ];
+
+    // Helper functions for Kenyan names
+    function getKenyanName(index) {
+        const firstNames = [
+            'John', 'Mary', 'Peter', 'Jane', 'David', 'Sarah', 'James', 'Esther', 'Michael', 'Grace',
+            'Daniel', 'Ruth', 'Joseph', 'Faith', 'Samuel', 'Mercy', 'Patrick', 'Lucy', 'Paul', 'Agnes',
+            'Stephen', 'Rose', 'Charles', 'Alice', 'Thomas', 'Ann', 'Simon', 'Catherine', 'Alex', 'Monica',
+            'Kennedy', 'Doris', 'Robert', 'Nancy', 'Francis', 'Elizabeth', 'Moses', 'Margaret', 'Vincent', 'Janet'
+        ];
+        
+        const lastNames = [
+            'Omondi', 'Wanjiku', 'Odhiambo', 'Akinyi', 'Otieno', 'Atieno', 'Kipchoge', 'Jepkosgei',
+            'Mwangi', 'Wambui', 'Kariuki', 'Njeri', 'Kimani', 'Wanjiru', 'Ochieng', 'Achieng',
+            'Mutua', 'Mwikali', 'Kiprop', 'Chepkoech', 'Kosgei', 'Chebet', 'Rotich', 'Jepchirchir',
+            'Kiptoo', 'Chepkorir', 'Limo', 'Cherotich', 'Kipkemoi', 'Jepkemoi', 'Kipkirui', 'Chepkurui'
+        ];
+        
+        return `${firstNames[index % firstNames.length]} ${lastNames[index % lastNames.length]}`;
+    }
+
+    function getInternationalName(index) {
+        const firstNames = [
+            'Emma', 'Liam', 'Olivia', 'Noah', 'Ava', 'Ethan', 'Sophia', 'Jackson', 'Isabella', 'Lucas',
+            'Mia', 'Aiden', 'Amelia', 'Caden', 'Harper', 'Elijah', 'Evelyn', 'Oliver', 'Abigail', 'Carter',
+            'Emily', 'James', 'Elizabeth', 'Benjamin', 'Sofia', 'Alexander', 'Avery', 'Jacob', 'Ella', 'Michael'
+        ];
+        
+        const lastNames = [
+            'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
+            'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin'
+        ];
+        
+        return `${firstNames[index % firstNames.length]} ${lastNames[index % lastNames.length]}`;
+    }
+
+    function getTestimonialText(index) {
+        const texts = [
+            "This course transformed my career. I went from a complete beginner to a professional web developer in just 3 months!",
+            "The instructors are amazing and the curriculum is very practical. Landed my dream job right after completion.",
+            "Best investment I've made in my education. The projects helped me build a strong portfolio.",
+            "Highly recommended! The support from the community and mentors is incredible.",
+            "I love how comprehensive the course is. Every concept is explained clearly with real-world examples.",
+            "Thanks to this course, I started my own freelancing business and now earn more than my previous job.",
+            "The hands-on approach makes learning fun and engaging. I finally understand web development!",
+            "Great value for money. The quality of content is better than many expensive bootcamps.",
+            "I was skeptical at first, but this course exceeded all my expectations. Truly life-changing.",
+            "The flexibility to learn at my own pace while working full-time was perfect for me."
+        ];
+        return texts[index % texts.length];
+    }
+
+    function getInternationalTestimonial(index) {
+        const texts = [
+            "Absolutely brilliant! The course structure is perfect for beginners and advanced learners alike.",
+            "I've taken many online courses, but this one stands out for its practical approach.",
+            "The projects are challenging and really help solidify the concepts. Great learning experience!",
+            "Five stars! The instructors explain complex topics in a simple, easy-to-understand way.",
+            "This platform changed my life. I'm now working as a developer thanks to this course.",
+            "Excellent content, great support, and amazing community. Couldn't ask for more.",
+            "The best part is the real-world projects. They prepared me for actual job challenges.",
+            "I appreciate how responsive the support team is. Any questions get answered quickly.",
+            "This course is worth every penny. The quality of education is top-notch.",
+            "I've learned more in 2 months than in 2 years of university. Highly recommended!"
+        ];
+        return texts[index % texts.length];
+    }
+
+    function getJobPosition(index) {
+        const positions = [
+            'Web Developer', 'Software Engineer', 'Freelancer', 'Frontend Developer', 'Backend Developer',
+            'Full Stack Developer', 'Graphic Designer', 'UI/UX Designer', 'Security Analyst', 'IT Consultant'
+        ];
+        return positions[index % positions.length];
+    }
+
+    function getInternationalJobPosition(index) {
+        const positions = [
+            'Senior Developer', 'Tech Entrepreneur', 'Solutions Architect', 'Creative Director',
+            'Security Specialist', 'Engineering Manager', 'Product Designer', 'Tech Consultant'
+        ];
+        return positions[index % positions.length];
+    }
+
+    function getKenyanCompany(index) {
+        const companies = [
+            'Safaricom', 'Equity Bank', 'KCB', 'M-Kopa', 'Twiga Foods', 'Andela', 'Cellulant',
+            'iHub', 'Moringa School', 'LakeHub', 'eLimu', 'BRCK', 'Jumia', 'Kopo Kopo'
+        ];
+        return companies[index % companies.length];
+    }
+
+    function getInternationalCompany(index) {
+        const companies = [
+            'Google', 'Microsoft', 'Amazon', 'Meta', 'Apple', 'Netflix', 'Twitter', 'LinkedIn',
+            'Uber', 'Airbnb', 'Spotify', 'Slack', 'Dropbox', 'Salesforce'
+        ];
+        return companies[index % companies.length];
+    }
+
+    function getRandomDate() {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const month = months[Math.floor(Math.random() * 12)];
+        const year = 2023 - Math.floor(Math.random() * 2);
+        return `${month} ${year}`;
+    }
+
+    // State management
+    let currentPage = 1;
+    const testimonialsPerPage = 6; // Show 6 cards initially in the row
+    let currentFilter = 'all';
+    let filteredTestimonials = testimonialsData;
+
+    // Function to render testimonials in horizontal row
+    function renderTestimonials() {
+        const row = document.getElementById('testimonialsRow');
+        if (!row) return;
+
+        // Filter testimonials
+        filteredTestimonials = currentFilter === 'all' 
+            ? testimonialsData 
+            : testimonialsData.filter(t => t.course === currentFilter);
+
+        // Calculate pagination
+        const start = 0;
+        const end = currentPage * testimonialsPerPage;
+        const paginatedTestimonials = filteredTestimonials.slice(start, end);
+
+        // Clear row
+        row.innerHTML = '';
+
+        // Render each testimonial as a card in the horizontal row
+        paginatedTestimonials.forEach(testimonial => {
+            const courseIcon = testimonial.course === 'webdev' ? '💻' : 
+                              testimonial.course === 'graphic' ? '🎨' : '🔒';
+            const courseName = testimonial.course === 'webdev' ? 'Web Dev' : 
+                              testimonial.course === 'graphic' ? 'Graphic Design' : 'Cyber Security';
+
+            const card = document.createElement('div');
+            card.className = 'testimonial-card';
+            card.innerHTML = `
+                <div class="d-flex align-items-center mb-3">
+                    <img src="${testimonial.avatar}" class="testimonial-avatar me-3" alt="${testimonial.name}" 
+                         onerror="this.src='https://ui-avatars.com/api/?name=${testimonial.name.replace(' ', '+')}&background=4e73df&color=fff&size=60'">
+                    <div>
+                        <h6 class="fw-bold mb-1">${testimonial.name}</h6>
+                        <div class="rating-stars mb-1">
+                            ${Array(5).fill().map((_, i) => 
+                                `<i class="fas fa-star${i < testimonial.rating ? '' : '-alt'} text-warning"></i>`
+                            ).join('')}
+                        </div>
+                        <span class="course-badge ${testimonial.course}">
+                            ${courseIcon} ${courseName}
+                        </span>
+                    </div>
+                </div>
+                <p class="testimonial-text">
+                    <i class="fas fa-quote-left text-primary opacity-25 me-1"></i>
+                    ${testimonial.text}
+                    <i class="fas fa-quote-right text-primary opacity-25 ms-1"></i>
+                </p>
+                <div class="testimonial-author">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="fw-semibold mb-0">${testimonial.position}</h6>
+                            <p class="text-muted small mb-0">@ ${testimonial.company}</p>
+                        </div>
+                        <span class="text-muted small">${testimonial.date}</span>
+                    </div>
+                </div>
+            `;
+            row.appendChild(card);
+        });
+
+        // Update counters
+        document.getElementById('displayedCount').textContent = Math.min(end, filteredTestimonials.length);
+        document.getElementById('totalCount').textContent = filteredTestimonials.length;
+
+        // Hide/show load more button
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        if (end >= filteredTestimonials.length) {
+            loadMoreBtn.style.display = 'none';
+        } else {
+            loadMoreBtn.style.display = 'block';
+        }
+    }
+
+    // Load more testimonials
+    function loadMoreTestimonials() {
+        currentPage++;
+        renderTestimonials();
+    }
+
+    // Scroll testimonials row
+    function scrollTestimonials(direction) {
+        const row = document.getElementById('testimonialsRow');
+        const scrollAmount = 400; // Adjust scroll amount as needed
+        
+        if (direction === 'left') {
+            row.scrollLeft -= scrollAmount;
+        } else {
+            row.scrollLeft += scrollAmount;
+        }
+    }
+
+    // Filter functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initial render
+        renderTestimonials();
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Update active state
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Get filter value and reset pagination
+                currentFilter = this.dataset.filter;
+                currentPage = 1;
+                
+                // Render filtered testimonials
+                renderTestimonials();
+            });
+        });
+
+        // Intersection observer for animations
         const observerOptions = {
             threshold: 0.1,
             rootMargin: '0px 0px -50px 0px'
         };
 
-        const observer = new IntersectionObserver(function (entries) {
+        const observer = new IntersectionObserver(function(entries) {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.style.opacity = '1';
@@ -374,13 +950,13 @@
         });
     });
 
-    // Add smooth hover effects
-    document.querySelectorAll('.course-card').forEach(card => {
-        card.addEventListener('mouseenter', function () {
-            this.style.transform = 'translateY(-10px)';
+    // Hover effects
+    document.querySelectorAll('.course-card, .testimonial-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
         });
 
-        card.addEventListener('mouseleave', function () {
+        card.addEventListener('mouseleave', function() {
             this.style.transform = 'translateY(0)';
         });
     });
